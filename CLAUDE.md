@@ -8,16 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Arcade Vault: a planned platform for playing games online and competing on a points leaderboard (see README.md). The repository is currently the unmodified output of `create-next-app` (App Router, TypeScript, Tailwind CSS v4) — `app/page.tsx` and `app/layout.tsx` still contain the default starter content, so no product architecture exists yet.
 
-## Commands
-
-```bash
-npm run dev      # start dev server (Next.js, Turbopack)
-npm run build    # production build
-npm run start    # run production build
-npm run lint     # eslint (flat config, eslint.config.mjs)
-```
-
 There is no test runner configured yet.
+
+## Skills
+Use always /frontend-design to disign the user interface.
 
 ## Before writing code
 
