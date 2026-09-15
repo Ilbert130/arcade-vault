@@ -1,6 +1,6 @@
 # SPEC 01 — MVP: pantallas visuales de Arcade Vault
 
-**Estado:** Approved
+**Estado:** Implemented
 **Depende de:** —
 **Fecha:** 2026-09-02
 **Objetivo:** Migrar las 5 pantallas visuales del prototipo estático (`references/templates/*.jsx`) a rutas reales de Next.js 16 (App Router + TS + Tailwind v4), sin implementar ningún juego jugable de verdad.
