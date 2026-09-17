@@ -1,33 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { getUser, setUser as persistUser, type SessionUser } from "@/lib/session";
+import { usePathname } from "next/navigation";
 
 export default function Nav() {
   const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState<SessionUser | null>(null);
 
-  useEffect(() => {
-    setUser(getUser());
-  }, [pathname]);
-
-  const isActive = (name: "biblioteca" | "salon" | "auth") => {
-    if (name === "biblioteca") return pathname === "/" || pathname.startsWith("/juegos");
+  const isActive = (name: "home" | "biblioteca" | "salon" | "about" | "auth") => {
+    if (name === "home") return pathname === "/";
+    if (name === "biblioteca") return pathname === "/biblioteca";
     if (name === "salon") return pathname === "/salon";
+    if (name === "about") return pathname === "/about";
     return pathname === "/auth";
   };
 
   const close = () => setOpen(false);
-
-  const handleSignOut = () => {
-    persistUser(null);
-    setUser(null);
-    router.push("/");
-  };
 
   return (
     <>
@@ -39,11 +28,17 @@ export default function Nav() {
           </div>
         </Link>
         <div className="links">
-          <Link className={isActive("biblioteca") ? "active" : ""} href="/">
+          <Link className={isActive("home") ? "active" : ""} href="/">
+            Inicio
+          </Link>
+          <Link className={isActive("biblioteca") ? "active" : ""} href="/biblioteca">
             Biblioteca
           </Link>
           <Link className={isActive("salon") ? "active" : ""} href="/salon">
             Salón de la Fama
+          </Link>
+          <Link className={isActive("about") ? "active" : ""} href="/about">
+            Acerca de
           </Link>
         </div>
         <div className="spacer"></div>
@@ -51,15 +46,9 @@ export default function Nav() {
           <span className="coin"></span>
           <span>CRÉDITOS · 03</span>
         </div>
-        {user ? (
-          <button className="btn ghost auth-btn" onClick={handleSignOut}>
-            {user.name} ▾
-          </button>
-        ) : (
-          <Link className="btn auth-btn" href="/auth">
-            Iniciar Sesión
-          </Link>
-        )}
+        <Link className="btn auth-btn" href="/auth">
+          Iniciar Sesión
+        </Link>
         <button className="btn ghost hamburger" onClick={() => setOpen(true)} aria-label="Menú">
           ≡
         </button>
@@ -70,14 +59,20 @@ export default function Nav() {
         <div className="pixel neon-cyan" style={{ fontSize: 11, marginBottom: 16 }}>
           MENÚ
         </div>
-        <Link className={isActive("biblioteca") ? "active" : ""} href="/" onClick={close}>
+        <Link className={isActive("home") ? "active" : ""} href="/" onClick={close}>
+          Inicio
+        </Link>
+        <Link className={isActive("biblioteca") ? "active" : ""} href="/biblioteca" onClick={close}>
           Biblioteca
         </Link>
         <Link className={isActive("salon") ? "active" : ""} href="/salon" onClick={close}>
           Salón de la Fama
         </Link>
+        <Link className={isActive("about") ? "active" : ""} href="/about" onClick={close}>
+          Acerca de
+        </Link>
         <Link className={isActive("auth") ? "active" : ""} href="/auth" onClick={close}>
-          {user ? "Cuenta" : "Iniciar Sesión"}
+          Iniciar Sesión
         </Link>
         <div style={{ flex: 1 }}></div>
         <div className="pixel" style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}>

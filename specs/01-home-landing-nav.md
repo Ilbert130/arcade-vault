@@ -1,6 +1,6 @@
 # 01 — Home (landing) y Nav
 
-**Estado:** Approved
+**Estado:** Implemented
 **Depende de:** Ninguno
 **Fecha:** 2026-09-17
 
@@ -71,16 +71,16 @@ export const TOP_PLAYERS: TopPlayer[];
 
 ## Criterios de aceptación
 
-- [ ] `app/layout.tsx` carga "Press Start 2P" y "JetBrains Mono" vía `next/font/google` y las expone como variables CSS usadas en `globals.css`.
-- [ ] `app/globals.css` contiene el tema portado del template (colores, fondo de grid animado, scanlines, fuentes pixel/mono, clases de componentes) adaptado de `styles.css`.
-- [ ] `lib/mock-data.ts` exporta `GAMES`, `ACTIVITY` y `TOP_PLAYERS` tipados.
-- [ ] El `Nav` se renderiza en todas las páginas con logo, links (Inicio, Biblioteca, Salón de la Fama, Acerca de), botón "Iniciar Sesión" apuntando a `/auth`, y un menú móvil hamburguesa funcional.
-- [ ] La página `/` renderiza las 7 secciones del template: Hero, Por qué Arcade Vault, vista previa de juegos, estadísticas, actividad en vivo, precios y CTA final.
-- [ ] La animación de scroll-reveal (`.reveal` → `.in`) funciona en las secciones de Home.
-- [ ] Al hacer clic en una MiniCard o en los CTA de "explorar/ver juegos" se navega a `/biblioteca`.
-- [ ] `/biblioteca`, `/salon`, `/about` y `/auth` existen como rutas placeholder y no devuelven 404.
-- [ ] `npm run dev` inicia sin errores y la consola del navegador no muestra errores en `/`.
-- [ ] `npm run build` completa exitosamente.
+- [x] `app/layout.tsx` carga "Press Start 2P" y "JetBrains Mono" vía `next/font/google` y las expone como variables CSS usadas en `globals.css`.
+- [x] `app/globals.css` contiene el tema portado del template (colores, fondo de grid animado, scanlines, fuentes pixel/mono, clases de componentes) adaptado de `styles.css`.
+- [x] `lib/mock-data.ts` exporta `GAMES`, `ACTIVITY` y `TOP_PLAYERS` tipados.
+- [x] El `Nav` se renderiza en todas las páginas con logo, links (Inicio, Biblioteca, Salón de la Fama, Acerca de), botón "Iniciar Sesión" apuntando a `/auth`, y un menú móvil hamburguesa funcional.
+- [x] La página `/` renderiza las 7 secciones del template: Hero, Por qué Arcade Vault, vista previa de juegos, estadísticas, actividad en vivo, precios y CTA final.
+- [x] La animación de scroll-reveal (`.reveal` → `.in`) funciona en las secciones de Home.
+- [x] Al hacer clic en una MiniCard o en los CTA de "explorar/ver juegos" se navega a `/biblioteca`.
+- [x] `/biblioteca`, `/salon`, `/about` y `/auth` existen como rutas placeholder y no devuelven 404.
+- [x] `npm run dev` inicia sin errores y la consola del navegador no muestra errores en `/`.
+- [x] `npm run build` completa exitosamente.
 
 ## Decisiones tomadas y descartadas
 
