@@ -1,5 +1,5 @@
-import ComingSoon from "@/components/ComingSoon";
+import Auth from "@/components/Auth";
 
 export default function Page() {
-  return <ComingSoon title="INICIAR SESIÓN" />;
+  return <Auth />;
 }

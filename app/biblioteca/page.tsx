@@ -1,5 +1,5 @@
-import ComingSoon from "@/components/ComingSoon";
+import Library from "@/components/Library";
 
 export default function Page() {
-  return <ComingSoon title="BIBLIOTECA" />;
+  return <Library />;
 }
