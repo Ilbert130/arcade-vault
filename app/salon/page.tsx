@@ -1,5 +1,5 @@
-import ComingSoon from "@/components/ComingSoon";
+import HallOfFame from "@/components/HallOfFame";
 
 export default function Page() {
-  return <ComingSoon title="SALÓN DE LA FAMA" />;
+  return <HallOfFame />;
 }

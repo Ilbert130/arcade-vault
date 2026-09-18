@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { getUser, setUser, type SessionUser } from "@/lib/session";
 
 export default function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [user, setUserState] = useState<SessionUser | null>(null);
+
+  useEffect(() => {
+    setUserState(getUser());
+  }, [pathname]);
 
   const isActive = (name: "home" | "biblioteca" | "salon" | "about" | "auth") => {
     if (name === "home") return pathname === "/";
@@ -17,6 +23,11 @@ export default function Nav() {
   };
 
   const close = () => setOpen(false);
+
+  const logout = () => {
+    setUser(null);
+    setUserState(null);
+  };
 
   return (
     <>
@@ -46,9 +57,18 @@ export default function Nav() {
           <span className="coin"></span>
           <span>CRÉDITOS · 03</span>
         </div>
-        <Link className="btn auth-btn" href="/auth">
-          Iniciar Sesión
-        </Link>
+        {user ? (
+          <div className="session-box">
+            <span className="btn auth-btn">{user.name || "INVITADO"}</span>
+            <button className="btn ghost" onClick={logout}>
+              Salir
+            </button>
+          </div>
+        ) : (
+          <Link className="btn auth-btn" href="/auth">
+            Iniciar Sesión
+          </Link>
+        )}
         <button className="btn ghost hamburger" onClick={() => setOpen(true)} aria-label="Menú">
           ≡
         </button>
@@ -71,9 +91,24 @@ export default function Nav() {
         <Link className={isActive("about") ? "active" : ""} href="/about" onClick={close}>
           Acerca de
         </Link>
-        <Link className={isActive("auth") ? "active" : ""} href="/auth" onClick={close}>
-          Iniciar Sesión
-        </Link>
+        {user ? (
+          <div className="session-box">
+            <span className={isActive("auth") ? "active" : ""}>{user.name || "INVITADO"}</span>
+            <button
+              className="btn ghost"
+              onClick={() => {
+                logout();
+                close();
+              }}
+            >
+              Salir
+            </button>
+          </div>
+        ) : (
+          <Link className={isActive("auth") ? "active" : ""} href="/auth" onClick={close}>
+            Iniciar Sesión
+          </Link>
+        )}
         <div style={{ flex: 1 }}></div>
         <div className="pixel" style={{ fontSize: 9, color: "var(--ink-faint)", letterSpacing: "0.16em" }}>
           CRÉDITOS · 03
