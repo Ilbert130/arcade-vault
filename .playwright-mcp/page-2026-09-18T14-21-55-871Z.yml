@@ -1,0 +1,135 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - navigation [ref=f5e3]:
+      - link "ARCADE VAULT" [ref=f5e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f5e7]:
+        - link "Inicio" [ref=f5e8] [cursor=pointer]:
+          - /url: /
+        - link "Biblioteca" [ref=f5e9] [cursor=pointer]:
+          - /url: /biblioteca
+        - link "Salón de la Fama" [ref=f5e10] [cursor=pointer]:
+          - /url: /salon
+        - link "Acerca de" [ref=f5e11] [cursor=pointer]:
+          - /url: /about
+      - generic [ref=f5e12]: CRÉDITOS · 03
+      - generic [ref=f5e60]:
+        - generic [ref=f5e61] [cursor=pointer]: TEST
+        - button "Salir" [ref=f5e62] [cursor=pointer]
+    - complementary [ref=f5e16]:
+      - generic [ref=f5e17]: MENÚ
+      - link "Inicio" [ref=f5e18] [cursor=pointer]:
+        - /url: /
+      - link "Biblioteca" [ref=f5e19] [cursor=pointer]:
+        - /url: /biblioteca
+      - link "Salón de la Fama" [ref=f5e20] [cursor=pointer]:
+        - /url: /salon
+      - link "Acerca de" [ref=f5e21] [cursor=pointer]:
+        - /url: /about
+      - generic [ref=f5e63]:
+        - text: TEST
+        - button "Salir" [ref=f5e64] [cursor=pointer]
+      - generic [ref=f5e24]: CRÉDITOS · 03
+    - main [ref=f5e25]:
+      - generic [ref=f5e65]:
+        - generic [ref=f5e66]:
+          - heading "ARCADE VAULT" [level=1] [ref=f5e67]
+          - generic [ref=f5e68]: INSERTA UNA MONEDA PARA JUGAR _
+        - generic [ref=f5e69]:
+          - generic [ref=f5e70]:
+            - generic [ref=f5e71]: ⌕
+            - textbox "Buscar un juego por nombre…" [ref=f5e72]
+          - generic [ref=f5e73]:
+            - button "TODOS" [ref=f5e74] [cursor=pointer]
+            - button "ARCADE" [ref=f5e75] [cursor=pointer]
+            - button "PUZZLE" [ref=f5e76] [cursor=pointer]
+            - button "SHOOTER" [ref=f5e77] [cursor=pointer]
+            - button "VERSUS" [ref=f5e78] [cursor=pointer]
+        - generic [ref=f5e79]:
+          - generic [ref=f5e80] [cursor=pointer]:
+            - generic [ref=f5e81]: ARCADE
+            - generic [ref=f5e84]:
+              - generic [ref=f5e85]: BLOQUE BUSTER
+              - generic [ref=f5e86]: Rebota la pelota y destruye muros de neón.
+              - generic [ref=f5e87]:
+                - generic [ref=f5e88]:
+                  - generic [ref=f5e89]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e90]: "28.450"
+                - button "JUGAR" [ref=f5e91]
+          - generic [ref=f5e92] [cursor=pointer]:
+            - generic [ref=f5e93]: PUZZLE
+            - generic [ref=f5e96]:
+              - generic [ref=f5e97]: CAÍDA
+              - generic [ref=f5e98]: Encaja las piezas antes de que el techo te aplaste.
+              - generic [ref=f5e99]:
+                - generic [ref=f5e100]:
+                  - generic [ref=f5e101]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e102]: "184.220"
+                - button "JUGAR" [ref=f5e103]
+          - generic [ref=f5e104] [cursor=pointer]:
+            - generic [ref=f5e105]: ARCADE
+            - generic [ref=f5e108]:
+              - generic [ref=f5e109]: SERPENTINA
+              - generic [ref=f5e110]: Crece sin morder tu propia cola.
+              - generic [ref=f5e111]:
+                - generic [ref=f5e112]:
+                  - generic [ref=f5e113]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e114]: "7820"
+                - button "JUGAR" [ref=f5e115]
+          - generic [ref=f5e116] [cursor=pointer]:
+            - generic [ref=f5e117]:
+              - generic [ref=f5e118]: •••
+              - generic [ref=f5e119]: ARCADE
+            - generic [ref=f5e120]:
+              - generic [ref=f5e121]: GLOTÓN
+              - generic [ref=f5e122]: Devora puntos y escapa de los fantasmas.
+              - generic [ref=f5e123]:
+                - generic [ref=f5e124]:
+                  - generic [ref=f5e125]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e126]: "96.400"
+                - button "JUGAR" [ref=f5e127]
+          - generic [ref=f5e128] [cursor=pointer]:
+            - generic [ref=f5e129]: SHOOTER
+            - generic [ref=f5e132]:
+              - generic [ref=f5e133]: INVASORES
+              - generic [ref=f5e134]: Defiende el planeta de filas alienígenas.
+              - generic [ref=f5e135]:
+                - generic [ref=f5e136]:
+                  - generic [ref=f5e137]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e138]: "54.190"
+                - button "JUGAR" [ref=f5e139]
+          - generic [ref=f5e140] [cursor=pointer]:
+            - generic [ref=f5e141]:
+              - generic [ref=f5e142]: ▲
+              - generic [ref=f5e143]: SHOOTER
+            - generic [ref=f5e144]:
+              - generic [ref=f5e145]: ROCAS
+              - generic [ref=f5e146]: Pulveriza asteroides en gravedad cero.
+              - generic [ref=f5e147]:
+                - generic [ref=f5e148]:
+                  - generic [ref=f5e149]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e150]: "41.200"
+                - button "JUGAR" [ref=f5e151]
+          - generic [ref=f5e152] [cursor=pointer]:
+            - generic [ref=f5e153]: ARCADE
+            - generic [ref=f5e156]:
+              - generic [ref=f5e157]: RANARIA
+              - generic [ref=f5e158]: Cruza la autopista de pixeles.
+              - generic [ref=f5e159]:
+                - generic [ref=f5e160]:
+                  - generic [ref=f5e161]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e162]: "18.900"
+                - button "JUGAR" [ref=f5e163]
+          - generic [ref=f5e164] [cursor=pointer]:
+            - generic [ref=f5e165]: VERSUS
+            - generic [ref=f5e168]:
+              - generic [ref=f5e169]: DUELO PIXEL
+              - generic [ref=f5e170]: Dos paletas. Una pelota. Reflejos máximos.
+              - generic [ref=f5e171]:
+                - generic [ref=f5e172]:
+                  - generic [ref=f5e173]: MEJOR PUNTUACIÓN
+                  - generic [ref=f5e174]: "24"
+                - button "JUGAR" [ref=f5e175]
+    - contentinfo [ref=f5e49]: © 2026 ARCADE VAULT · HECHO CON PIXELES Y NEÓN · v2.6.0
+  - button "Open Next.js Dev Tools" [ref=f5e55] [cursor=pointer]
+  - alert [ref=f5e59]: ARCADE VAULT
