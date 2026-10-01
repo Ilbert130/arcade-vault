@@ -1,6 +1,6 @@
 # 05 — ROCAS: juego de Asteroides real en la plataforma
 
-**Estado:** Aprobado
+**Estado:** Implementado
 **Depende de:** SPEC 04-supabase-auth
 **Fecha:** 2026-09-30
 
@@ -139,22 +139,22 @@ components/games/
 
 ## Criterios de aceptación
 
-- [ ] Existen `lib/games/asteroids/{types,constants,entities,engine}.ts` y `components/games/AsteroidsCanvas.tsx`, sin `any` ni `@ts-ignore`.
-- [ ] El motor no usa variables globales de módulo mutables ni `document.getElementById`; todo el estado vive en el closure de `createAsteroidsGame`.
-- [ ] `/juegos/rocas/jugar` ejecuta el juego real en un `<canvas>` dentro de `.crt-screen`; el resto de ids conserva la simulación anterior.
-- [ ] La partida no empieza hasta pulsar Espacio o EMPEZAR en el overlay de inicio.
-- [ ] Puntos por asteroide: grande 20, mediano 50, pequeño 100; los grandes y medianos se dividen en dos.
-- [ ] El canvas dibuja su HUD (puntuación, nivel, iconos de vida, indicador `3x`) en paleta neón, y el HUD de React refleja los mismos valores reales del motor; el canvas no dibuja el overlay "GAME OVER".
-- [ ] `onHud` no se emite en cada frame (solo al cambiar un valor).
-- [ ] El power-up 3x aparece, otorga 5 s de disparo triple y su indicador se ve en el canvas.
-- [ ] Flechas y Espacio no provocan scroll ni activan botones mientras se juega.
-- [ ] P / Escape / botón PAUSA alternan la pausa; ocultar la pestaña o perder el foco pausa automáticamente.
-- [ ] Al llegar a 0 vidas o pulsar FIN se abre el modal "FIN DEL JUEGO" con la puntuación correcta, y "GUARDAR PUNTUACIÓN" la guarda con `saveScore`.
-- [ ] "JUGAR DE NUEVO" reinicia a puntuación 0, 3 vidas, nivel 01 y estado de inicio.
-- [ ] Salir de la página cancela el `requestAnimationFrame` y elimina todos los listeners (verificable entrando y saliendo varias veces sin aceleración ni errores).
-- [ ] El canvas mantiene 4:3, escala con el contenedor y se ve nítido en pantallas HiDPI.
-- [ ] Los colores del canvas usan la paleta neón del Vault (cyan, magenta, amarillo, verde).
-- [ ] `npm run build` y `npm run lint` completan sin errores y la consola del navegador no muestra errores en `/juegos/rocas/jugar`.
+- [x] Existen `lib/games/asteroids/{types,constants,entities,engine}.ts` y `components/games/AsteroidsCanvas.tsx`, sin `any` ni `@ts-ignore`.
+- [x] El motor no usa variables globales de módulo mutables ni `document.getElementById`; todo el estado vive en el closure de `createAsteroidsGame`.
+- [x] `/juegos/rocas/jugar` ejecuta el juego real en un `<canvas>` dentro de `.crt-screen`; el resto de ids conserva la simulación anterior.
+- [x] La partida no empieza hasta pulsar Espacio o EMPEZAR en el overlay de inicio.
+- [x] Puntos por asteroide: grande 20, mediano 50, pequeño 100; los grandes y medianos se dividen en dos.
+- [x] El canvas dibuja su HUD (puntuación, nivel, iconos de vida, indicador `3x`) en paleta neón, y el HUD de React refleja los mismos valores reales del motor; el canvas no dibuja el overlay "GAME OVER".
+- [x] `onHud` no se emite en cada frame (solo al cambiar un valor).
+- [x] El power-up 3x aparece, otorga 5 s de disparo triple y su indicador se ve en el canvas.
+- [x] Flechas y Espacio no provocan scroll ni activan botones mientras se juega.
+- [x] P / Escape / botón PAUSA alternan la pausa; ocultar la pestaña o perder el foco pausa automáticamente.
+- [x] Al llegar a 0 vidas o pulsar FIN se abre el modal "FIN DEL JUEGO" con la puntuación correcta, y "GUARDAR PUNTUACIÓN" la guarda con `saveScore`.
+- [x] "JUGAR DE NUEVO" reinicia a puntuación 0, 3 vidas, nivel 01 y estado de inicio.
+- [x] Salir de la página cancela el `requestAnimationFrame` y elimina todos los listeners (verificable entrando y saliendo varias veces sin aceleración ni errores).
+- [x] El canvas mantiene 4:3, escala con el contenedor y se ve nítido en pantallas HiDPI.
+- [x] Los colores del canvas usan la paleta neón del Vault (cyan, magenta, amarillo, verde).
+- [x] `npm run build` y `npm run lint` completan sin errores y la consola del navegador no muestra errores en `/juegos/rocas/jugar`.
 
 ## Decisiones tomadas y descartadas
 

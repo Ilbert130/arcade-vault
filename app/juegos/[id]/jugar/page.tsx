@@ -1,19 +1,37 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { MouseEvent } from "react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { GAMES } from "@/lib/data";
 import { saveScore } from "@/lib/session";
 import { getCurrentUsername } from "@/lib/supabase/client";
+import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
+import type { AsteroidsStatus } from "@/components/games/AsteroidsCanvas";
+import type { AsteroidsHud } from "@/lib/games/asteroids/types";
+const START_LIVES = 3;
+// Tras pulsar un botón se le quita el foco para que Espacio no vuelva a activarlo.
+const blurTarget = (e: MouseEvent<HTMLButtonElement>) => e.currentTarget.blur();
+const togglePause = (s: AsteroidsStatus): AsteroidsStatus =>
+  s === "playing" ? "paused" : s === "paused" ? "playing" : s;
 export default function GamePlayerPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const game = GAMES.find((g) => g.id === params.id);
+  const isRocas = game?.id === "rocas";
   const [score, setScore] = useState(0);
   const scoreRef = useRef(0);
-  const [lives] = useState(3);
+  const [lives, setLives] = useState(START_LIVES);
   const [level, setLevel] = useState(1);
-  const [paused, setPaused] = useState(false);
-  const [over, setOver] = useState(false);
+  // ROCAS espera en "ready" a que el jugador empiece; la simulación arranca jugando.
+  const [status, setStatus] = useState<AsteroidsStatus>(
+    isRocas ? "ready" : "playing",
+  );
+  const statusRef = useRef(status);
+  useEffect(() => {
+    statusRef.current = status;
+  }, [status]);
+  const paused = status === "paused";
+  const over = status === "over";
   // "INVITADO" en el primer render; el efecto lo sustituye por el username si hay sesión.
   const [name, setName] = useState("INVITADO");
   const [saved, setSaved] = useState(false);
@@ -26,8 +44,9 @@ export default function GamePlayerPage() {
       active = false;
     };
   }, []);
+  // Puntuación simulada: solo para los juegos que aún no tienen motor real.
   useEffect(() => {
-    if (over || paused) return;
+    if (isRocas || status !== "playing") return;
     const t = setInterval(() => {
       // Subir de nivel en el mismo tick que actualiza la puntuación (sin efecto aparte).
       const next = scoreRef.current + Math.floor(10 + Math.random() * 90);
@@ -36,15 +55,50 @@ export default function GamePlayerPage() {
       if (next % 2500 < 100) setLevel((l) => l + 1);
     }, 220);
     return () => clearInterval(t);
-  }, [over, paused]);
+  }, [isRocas, status]);
+  // ROCAS: Espacio empieza, P / Escape alternan pausa; ocultar la pestaña o perder el foco pausa.
+  useEffect(() => {
+    if (!isRocas) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code === "Space" && statusRef.current === "ready") {
+        e.preventDefault();
+        setStatus("playing");
+      } else if (e.code === "KeyP" || e.code === "Escape") {
+        setStatus(togglePause);
+      }
+    };
+    const autoPause = () => setStatus((s) => (s === "playing" ? "paused" : s));
+    const onVisibility = () => {
+      if (document.hidden) autoPause();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("blur", autoPause);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("blur", autoPause);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [isRocas]);
+  const handleHud = useCallback((hud: AsteroidsHud) => {
+    scoreRef.current = hud.score;
+    setScore(hud.score);
+    setLives(hud.lives);
+    setLevel(hud.level);
+  }, []);
+  const handleGameOver = useCallback((finalScore: number) => {
+    scoreRef.current = finalScore;
+    setScore(finalScore);
+    setStatus("over");
+  }, []);
   if (!game) notFound();
-  const endGame = () => setOver(true);
+  const endGame = () => setStatus("over");
   const restart = () => {
     scoreRef.current = 0;
     setScore(0);
+    setLives(START_LIVES);
     setLevel(1);
-    setPaused(false);
-    setOver(false);
+    setStatus(isRocas ? "ready" : "playing");
     setSaved(false);
   };
   return (
@@ -71,10 +125,22 @@ export default function GamePlayerPage() {
           </div>
         </div>
         <div className="hud-actions">
-          <button className="btn yellow" onClick={() => setPaused((p) => !p)}>
+          <button
+            className="btn yellow"
+            onClick={(e) => {
+              blurTarget(e);
+              setStatus(togglePause);
+            }}
+          >
             {paused ? "REANUDAR" : "PAUSA"}
           </button>
-          <button className="btn magenta" onClick={endGame}>
+          <button
+            className="btn magenta"
+            onClick={(e) => {
+              blurTarget(e);
+              endGame();
+            }}
+          >
             FIN
           </button>
           <button
@@ -87,13 +153,40 @@ export default function GamePlayerPage() {
       </div>
       <div className="crt">
         <div className="crt-screen">
-          <div className="game-arena">
-            <div className="grid-floor"></div>
-            <div className="enemy e1"></div>
-            <div className="enemy e2"></div>
-            <div className="enemy e3"></div>
-            <div className="player-ship"></div>
-          </div>
+          {isRocas ? (
+            <AsteroidsCanvas
+              status={status}
+              onHud={handleHud}
+              onGameOver={handleGameOver}
+            />
+          ) : (
+            <div className="game-arena">
+              <div className="grid-floor"></div>
+              <div className="enemy e1"></div>
+              <div className="enemy e2"></div>
+              <div className="enemy e3"></div>
+              <div className="player-ship"></div>
+            </div>
+          )}
+          {isRocas && status === "ready" && (
+            <div className="crt-content rocas-start">
+              <div className="rocas-start-inner">
+                <div className="rocas-start-title pixel">ROCAS</div>
+                <div className="rocas-start-prompt pixel">
+                  PULSA ESPACIO PARA EMPEZAR
+                </div>
+                <button
+                  className="btn"
+                  onClick={(e) => {
+                    blurTarget(e);
+                    setStatus("playing");
+                  }}
+                >
+                  EMPEZAR
+                </button>
+              </div>
+            </div>
+          )}
           {paused && (
             <div
               className="crt-content"
@@ -121,7 +214,13 @@ export default function GamePlayerPage() {
         <div className="crt-bottom">
           <span className="led">SEÑAL OK</span>
           <span>{game.title} · CRT-83 · 60 HZ</span>
-          <span>CARGA · 1MB</span>
+          {isRocas ? (
+            <span className="crt-controls">
+              ← → ROTAR · ↑ PROPULSAR · ESPACIO DISPARAR · P PAUSA
+            </span>
+          ) : (
+            <span>CARGA · 1MB</span>
+          )}
         </div>
       </div>
       {over && (
