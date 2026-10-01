@@ -1,44 +1,52 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { GAMES } from "@/lib/data";
-import { getUser, saveScore } from "@/lib/session";
-
+import { saveScore } from "@/lib/session";
+import { getCurrentUsername } from "@/lib/supabase/client";
 export default function GamePlayerPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const game = GAMES.find((g) => g.id === params.id);
-
   const [score, setScore] = useState(0);
+  const scoreRef = useRef(0);
   const [lives] = useState(3);
   const [level, setLevel] = useState(1);
   const [paused, setPaused] = useState(false);
   const [over, setOver] = useState(false);
-  const [name, setName] = useState(() => getUser()?.name ?? "INVITADO");
+  // "INVITADO" en el primer render; el efecto lo sustituye por el username si hay sesión.
+  const [name, setName] = useState("INVITADO");
   const [saved, setSaved] = useState(false);
-
+  useEffect(() => {
+    let active = true;
+    getCurrentUsername().then((username) => {
+      if (active && username) setName(username);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   useEffect(() => {
     if (over || paused) return;
-    const t = setInterval(() => setScore((s) => s + Math.floor(10 + Math.random() * 90)), 220);
+    const t = setInterval(() => {
+      // Subir de nivel en el mismo tick que actualiza la puntuación (sin efecto aparte).
+      const next = scoreRef.current + Math.floor(10 + Math.random() * 90);
+      scoreRef.current = next;
+      setScore(next);
+      if (next % 2500 < 100) setLevel((l) => l + 1);
+    }, 220);
     return () => clearInterval(t);
   }, [over, paused]);
-
-  useEffect(() => {
-    if (score > 0 && score % 2500 < 100) setLevel((l) => l + 1);
-  }, [score]);
-
   if (!game) notFound();
-
   const endGame = () => setOver(true);
   const restart = () => {
+    scoreRef.current = 0;
     setScore(0);
     setLevel(1);
     setPaused(false);
     setOver(false);
     setSaved(false);
   };
-
   return (
     <div className="av-player fade-in">
       <div className="player-hud">
@@ -69,12 +77,14 @@ export default function GamePlayerPage() {
           <button className="btn magenta" onClick={endGame}>
             FIN
           </button>
-          <button className="btn ghost" onClick={() => router.push(`/juegos/${game.id}`)}>
+          <button
+            className="btn ghost"
+            onClick={() => router.push(`/juegos/${game.id}`)}
+          >
             SALIR
           </button>
         </div>
       </div>
-
       <div className="crt">
         <div className="crt-screen">
           <div className="game-arena">
@@ -85,12 +95,23 @@ export default function GamePlayerPage() {
             <div className="player-ship"></div>
           </div>
           {paused && (
-            <div className="crt-content" style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}>
+            <div
+              className="crt-content"
+              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+            >
               <div>
                 <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
                   EN PAUSA
                 </div>
-                <div className="mono" style={{ fontSize: 11, color: "var(--ink-dim)", marginTop: 10, letterSpacing: "0.16em" }}>
+                <div
+                  className="mono"
+                  style={{
+                    fontSize: 11,
+                    color: "var(--ink-dim)",
+                    marginTop: 10,
+                    letterSpacing: "0.16em",
+                  }}
+                >
                   PULSA REANUDAR PARA CONTINUAR
                 </div>
               </div>
@@ -103,7 +124,6 @@ export default function GamePlayerPage() {
           <span>CARGA · 1MB</span>
         </div>
       </div>
-
       {over && (
         <div className="modal-bd">
           <div className="modal">
@@ -114,7 +134,9 @@ export default function GamePlayerPage() {
               <div className="input-row">
                 <input
                   value={name}
-                  onChange={(e) => setName(e.target.value.toUpperCase().slice(0, 10))}
+                  onChange={(e) =>
+                    setName(e.target.value.toUpperCase().slice(0, 10))
+                  }
                   placeholder="TUS INICIALES"
                 />
                 <button

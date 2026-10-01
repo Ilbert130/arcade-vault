@@ -1,6 +1,6 @@
 # 04 — Supabase: infraestructura base y autenticación real
 
-**Estado:** Aprobado
+**Estado:** Implementado
 **Depende de:** SPEC 03-biblioteca-salon-auth
 **Fecha:** 2026-09-29
 
@@ -80,6 +80,14 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 ```
 
+Migración adicional `supabase/migrations/<timestamp>_revoke_handle_new_user_execute.sql` (añadida durante la implementación para cumplir el criterio de `get_advisors`: lints 0028/0029 — función `security definer` invocable vía `/rest/v1/rpc`):
+
+```sql
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+```
+
+El trigger sigue funcionando: los triggers no requieren privilegio `EXECUTE`.
+
 ### TypeScript
 
 ```ts
@@ -142,21 +150,21 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 
 ## Criterios de aceptación
 
-- [ ] `package.json` incluye `@supabase/supabase-js` y `@supabase/ssr`.
-- [ ] `.env.example` documenta `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sin valores reales.
-- [ ] Existen `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/proxy.ts`, `lib/supabase/database.types.ts` y `proxy.ts` en la raíz.
-- [ ] `supabase/migrations/<timestamp>_profiles.sql` está en el repo y la tabla `public.profiles` existe en el proyecto remoto con RLS activado.
-- [ ] `get_advisors` (security) no reporta avisos sobre `public.profiles` ni sobre `handle_new_user`.
-- [ ] Registrarse desde `/auth` crea un usuario en `auth.users` y su fila en `profiles` con el `username` en mayúsculas, y deja la sesión iniciada.
-- [ ] No se puede registrar un `username` repetido ni fuera de `^[A-Z0-9_]{3,10}$`; se muestra el mensaje de error correspondiente en español.
-- [ ] Iniciar sesión con correo + contraseña válidos redirige a `/biblioteca`; credenciales inválidas muestran "Correo o contraseña incorrectos" sin borrar los campos.
-- [ ] El botón de envío está deshabilitado mientras la acción está en curso.
-- [ ] La sesión persiste tras recargar la página (cookies gestionadas por `proxy.ts`).
-- [ ] Con sesión activa, `/auth` redirige a `/biblioteca`; el resto de rutas no redirige en ningún caso.
-- [ ] El Nav (desktop y móvil) muestra el `username` con sesión y "Iniciar Sesión" sin ella; "Salir" cierra la sesión en Supabase y actualiza el Nav sin recargar.
-- [ ] `/salon` muestra "tu mejor marca" solo con sesión de Supabase; `/juegos/[id]/jugar` usa el `username` o "INVITADO".
-- [ ] `lib/session.ts` ya no exporta `getUser`/`setUser`/`SessionUser` y no hay referencias a ellos; la clave `av_user` de `localStorage` ya no se usa.
-- [ ] `npm run build` y `npm run lint` completan sin errores y la consola del navegador no muestra errores en `/auth`, `/biblioteca`, `/salon`.
+- [x] `package.json` incluye `@supabase/supabase-js` y `@supabase/ssr`.
+- [x] `.env.example` documenta `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` sin valores reales.
+- [x] Existen `lib/supabase/client.ts`, `lib/supabase/server.ts`, `lib/supabase/proxy.ts`, `lib/supabase/database.types.ts` y `proxy.ts` en la raíz.
+- [x] `supabase/migrations/<timestamp>_profiles.sql` está en el repo y la tabla `public.profiles` existe en el proyecto remoto con RLS activado.
+- [x] `get_advisors` (security) no reporta avisos sobre `public.profiles` ni sobre `handle_new_user`.
+- [x] Registrarse desde `/auth` crea un usuario en `auth.users` y su fila en `profiles` con el `username` en mayúsculas, y deja la sesión iniciada.
+- [x] No se puede registrar un `username` repetido ni fuera de `^[A-Z0-9_]{3,10}$`; se muestra el mensaje de error correspondiente en español.
+- [x] Iniciar sesión con correo + contraseña válidos redirige a `/biblioteca`; credenciales inválidas muestran "Correo o contraseña incorrectos" sin borrar los campos.
+- [x] El botón de envío está deshabilitado mientras la acción está en curso.
+- [x] La sesión persiste tras recargar la página (cookies gestionadas por `proxy.ts`).
+- [x] Con sesión activa, `/auth` redirige a `/biblioteca`; el resto de rutas no redirige en ningún caso.
+- [x] El Nav (desktop y móvil) muestra el `username` con sesión y "Iniciar Sesión" sin ella; "Salir" cierra la sesión en Supabase y actualiza el Nav sin recargar.
+- [x] `/salon` muestra "tu mejor marca" solo con sesión de Supabase; `/juegos/[id]/jugar` usa el `username` o "INVITADO".
+- [x] `lib/session.ts` ya no exporta `getUser`/`setUser`/`SessionUser` y no hay referencias a ellos; la clave `av_user` de `localStorage` ya no se usa.
+- [x] `npm run build` y `npm run lint` completan sin errores y la consola del navegador no muestra errores en `/auth`, `/biblioteca`, `/salon`.
 
 ## Decisiones tomadas y descartadas
 
@@ -181,3 +189,12 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 - **Paso manual en el dashboard.** Si no se desactiva "Confirm email", `signUp` no devuelve sesión y el usuario no queda logueado; la verificación manual debe detectarlo.
 - **Límites de Auth de Supabase** (rate limit de registros/logins por IP) pueden aparecer en pruebas repetidas; se muestran como error genérico.
 - **Variables de entorno ausentes.** Sin `.env.local`, los clientes lanzan error al crearse; debe fallar de forma controlada en las Server Actions (error genérico) y no romper el render del Nav.
+
+## Notas de implementación
+
+- **Migración extra** `revoke_handle_new_user_execute` para cumplir `get_advisors` (ver Modelo de datos).
+- **Mensajes no listados en el plan:** correo con formato inválido en `signUp` → "Ingresa un correo electrónico válido." (mismo texto que el formulario de contacto); campos vacíos en `signIn` → "Correo o contraseña incorrectos".
+- **Helpers compartidos** en `lib/supabase/client.ts` (`getSupabase`, `fetchUsername`, `getCurrentUsername`) usados por Nav, HallOfFame y `/jugar`.
+- **`prefetch={false}` en los enlaces a `/auth` del Nav:** con sesión recién iniciada, el prefetch de `/auth` era redirigido por `proxy.ts` y Next lo rechazaba con un 404 en consola.
+- **Lint:** se corrigieron errores previos en `components/Home.tsx` y `app/juegos/[id]/jugar/page.tsx` (subida de nivel sin efecto aparte) y se excluyó `references/**` de ESLint (material de referencia, no es parte de la app).
+- **Pendiente para un spec futuro:** `public.rls_auto_enable()` ejecutable vía API (preexistente) y "Leaked password protection" desactivado en Auth.
