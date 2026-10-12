@@ -2812,3 +2812,161 @@ a {
     animation: none;
   }
 }
+/* ===== leaderboard real: estados vacíos (spec 06) ===== */
+/* Casilla #01 vacante: el rango fantasma queda de fondo hasta que alguien la ocupe. */
+.lb-empty,
+.hall-empty {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  text-align: center;
+  border: 1px dashed rgba(255, 0, 110, 0.35);
+  background:
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgba(0, 245, 255, 0.025) 3px 4px
+    ),
+    var(--bg-2);
+}
+.lb-empty {
+  margin: 16px;
+  padding: 40px 16px 28px;
+}
+.hall-empty {
+  min-height: 260px;
+  padding: 48px 20px;
+  margin-bottom: 24px;
+}
+.lb-empty::before,
+.hall-empty::before {
+  content: "#01";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 0 10px 2px 0;
+  font-family: var(--pixel);
+  font-size: 64px;
+  line-height: 1;
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(255, 207, 58, 0.22);
+  pointer-events: none;
+}
+.hall-empty::before {
+  font-size: clamp(80px, 14vw, 150px);
+  padding: 0 18px 6px 0;
+}
+.lb-empty-title,
+.hall-empty-title {
+  position: relative;
+  font-family: var(--pixel);
+  color: var(--magenta);
+  text-shadow: 0 0 10px rgba(255, 0, 110, 0.55);
+  letter-spacing: 0.14em;
+  line-height: 1.6;
+}
+.lb-empty-title {
+  font-size: 11px;
+}
+.hall-empty-title {
+  font-size: clamp(11px, 2.4vw, 16px);
+}
+.lb-empty .btn {
+  position: relative;
+}
+/* Bloque "TU MEJOR MARCA", separado de la tabla para mostrarse también sin marcas. */
+.hall-table.hall-you {
+  margin-top: 16px;
+}
+.hall-table.hall-you .tr.you-label:last-child {
+  border-bottom: 0;
+}
+/* ===== modal: variantes de guardado (spec 06) ===== */
+.save-note {
+  font-family: var(--pixel);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  line-height: 1.7;
+}
+.save-note.demo {
+  display: inline-block;
+  margin: 22px 0 6px;
+  padding: 10px 14px;
+  color: var(--ink-dim);
+  border: 1px dashed var(--ink-faint);
+  transform: rotate(-1.5deg);
+}
+.save-guest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 22px 0 6px;
+}
+.save-note.guest {
+  color: var(--yellow);
+  text-shadow: 0 0 8px rgba(245, 255, 0, 0.45);
+}
+.player-tag {
+  flex: 1;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 12px;
+  text-align: left;
+  background: var(--bg);
+  border: 1px solid var(--line);
+}
+.player-tag .l {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--ink-faint);
+}
+.player-tag .v {
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: var(--ink);
+  letter-spacing: 0.08em;
+}
+.modal .btn:disabled {
+  cursor: progress;
+  opacity: 0.55;
+  box-shadow: none;
+  color: var(--ink-dim);
+}
+.save-error {
+  margin-top: 4px;
+  padding: 8px 10px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--magenta);
+  border-left: 3px solid var(--magenta);
+  background: rgba(255, 0, 110, 0.07);
+}
+@media (max-width: 480px) {
+  .modal .input-row {
+    flex-direction: column;
+  }
+}
+/* Podio parcial: cada puesto conserva su columna aunque falten los otros. */
+@media (min-width: 721px) {
+  .podium-slot.silver {
+    grid-column: 1;
+  }
+  .podium-slot.gold {
+    grid-column: 2;
+  }
+  .podium-slot.bronze {
+    grid-column: 3;
+  }
+}
