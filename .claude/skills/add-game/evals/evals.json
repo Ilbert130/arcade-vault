@@ -1,0 +1,23 @@
+{
+  "skill_name": "add-game",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Agrega Tetris (references/started-games/03-tetris) a la plataforma como el juego 'caida', jugable y con leaderboard.",
+      "expected_output": "Spec NN creado; motor TS en lib/games/tetris; TetrisCanvas; entrada en registry con HUD score/lines/level; migración playable=true para caida; build y lint verdes.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Quiero que Arkanoid de la carpeta de referencias quede integrado en bloque-buster con su ranking de puntuaciones.",
+      "expected_output": "Assets movidos a public/games/bloque-buster; levels.ts tipado; ratón escalado al canvas; victoria vía onGameOver; migración playable=true; overlays fuera del canvas.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Crea desde cero el juego Serpentina (Snake) para la plataforma, no hay referencia, y deja el leaderboard funcionando.",
+      "expected_output": "Spec con controles y reglas propias; motor desde cero con el contrato; registry; migración playable=true para serpentina; sin tocar saveScore.",
+      "files": []
+    }
+  ]
+}
