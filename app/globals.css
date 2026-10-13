@@ -2787,6 +2787,18 @@ a {
   background: #000;
   cursor: none;
 }
+/* ===== SERPENTINA (Snake real) ===== */
+/* Campo en fósforo verde: un filete interior marca los límites de la rejilla (el outline pinta sobre el canvas; un box-shadow inset quedaría tapado). */
+.serpentina-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  outline: 1px solid rgba(0, 255, 136, 0.35);
+  outline-offset: -1px;
+}
 /* Pantalla de atracción de ROCAS, CAÍDA y BLOQUE BUSTER: el campo del juego se ve tenue detrás. */
 .game-start {
   z-index: 5;
