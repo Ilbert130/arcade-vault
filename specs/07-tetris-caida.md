@@ -1,6 +1,6 @@
 # 07 — CAÍDA: Tetris real en la plataforma
 
-**Estado:** Borrador
+**Estado:** Implementado
 **Depende de:** SPEC 05-asteroides-rocas, SPEC 06-leaderboard-tabla-juegos
 **Fecha:** 2026-10-12
 
@@ -64,16 +64,16 @@ CLAUDE.md                                               juegos jugables / specs 
 
 ## Criterios de aceptación
 
-- [ ] El juego no arranca hasta pulsar EMPEZAR/Espacio; pausa (P/Esc/botón y automática) y FIN funcionan.
-- [ ] Las 8 piezas (incl. N), rotación con kicks, fantasma, siguiente pieza, líneas, puntuación, nivel y velocidad coinciden con el original.
-- [ ] `onHud` solo al cambiar valores; `onGameOver` exactamente una vez.
-- [ ] Sin `any`/`@ts-ignore`, sin globals mutables, sin acceso a DOM/`window` en el cuerpo del módulo.
-- [ ] Sin rAF ni listeners residuales al salir de la página; canvas 4:3 nítido en HiDPI.
-- [ ] Flechas y Espacio no hacen scroll ni activan botones durante la partida; teclas no quedan pegadas tras pausar.
-- [ ] `games.playable = true` para `caida` en el proyecto remoto; `get_advisors` sin avisos nuevos.
-- [ ] Invitado: "INICIA SESIÓN PARA GUARDAR TU MARCA" → `/auth`. Con sesión: "PUNTUACIÓN GUARDADA" y aparece en `/juegos/caida` y `/salon?juego=caida`.
-- [ ] ROCAS y los demás juegos simulados no cambian (los simulados siguen con "NO CLASIFICABLE (DEMO)").
-- [ ] `npm run build` y `npm run lint` sin errores; consola sin errores.
+- [x] El juego no arranca hasta pulsar EMPEZAR/Espacio; pausa (P/Esc/botón y automática) y FIN funcionan.
+- [x] Las 8 piezas (incl. N), rotación con kicks, fantasma, siguiente pieza, líneas, puntuación, nivel y velocidad coinciden con el original.
+- [x] `onHud` solo al cambiar valores; `onGameOver` exactamente una vez.
+- [x] Sin `any`/`@ts-ignore`, sin globals mutables, sin acceso a DOM/`window` en el cuerpo del módulo.
+- [x] Sin rAF ni listeners residuales al salir de la página; canvas 4:3 nítido en HiDPI.
+- [x] Flechas y Espacio no hacen scroll ni activan botones durante la partida; teclas no quedan pegadas tras pausar.
+- [x] `games.playable = true` para `caida` en el proyecto remoto; `get_advisors` sin avisos nuevos.
+- [x] Invitado: "INICIA SESIÓN PARA GUARDAR TU MARCA" → `/auth`. Con sesión: "PUNTUACIÓN GUARDADA" y aparece en `/juegos/caida` y `/salon?juego=caida`.
+- [x] ROCAS y los demás juegos simulados no cambian (los simulados siguen con "NO CLASIFICABLE (DEMO)").
+- [x] `npm run build` y `npm run lint` sin errores; consola sin errores.
 
 ## Decisiones tomadas y descartadas
 
