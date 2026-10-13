@@ -27,6 +27,7 @@ export async function getGames(): Promise<Game[]> {
     const { data, error } = await supabase
       .from("games")
       .select("*")
+      .eq("playable", true)
       .order("sort_order");
     if (error || !data) return [];
     return data;
@@ -38,7 +39,11 @@ export async function getGamesWithStats(): Promise<GameWithStats[]> {
   try {
     const supabase = await createClient();
     const [games, stats] = await Promise.all([
-      supabase.from("games").select("*").order("sort_order"),
+      supabase
+        .from("games")
+        .select("*")
+        .eq("playable", true)
+        .order("sort_order"),
       supabase.from("game_stats").select("*"),
     ]);
     if (games.error || !games.data) return [];
@@ -60,6 +65,7 @@ export async function getGame(id: string): Promise<Game | null> {
       .from("games")
       .select("*")
       .eq("id", id)
+      .eq("playable", true)
       .maybeSingle();
     if (error) return null;
     return data;

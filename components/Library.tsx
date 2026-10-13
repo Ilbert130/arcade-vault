@@ -9,6 +9,8 @@ export default function Library({ games }: { games: GameWithStats[] }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("TODOS");
 
+  const cats = useMemo(() => CATS.filter((c) => c === "TODOS" || games.some((g) => g.cat === c)), [games]);
+
   const filtered = useMemo(() => {
     return games.filter(
       (g) => (cat === "TODOS" || g.cat === cat) && g.title.toLowerCase().includes(q.toLowerCase())
@@ -30,7 +32,7 @@ export default function Library({ games }: { games: GameWithStats[] }) {
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar un juego por nombre…" />
         </div>
         <div className="av-chips">
-          {CATS.map((c) => (
+          {cats.map((c) => (
             <button key={c} className={"chip" + (cat === c ? " active" : "")} onClick={() => setCat(c)}>
               {c}
             </button>

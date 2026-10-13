@@ -1,10 +1,3 @@
-export type Game = {
-  id: string;
-  title: string;
-  cat: string;
-  cover: string; // clase CSS para el fondo de portada
-};
-
 export type ActivityEntry = {
   player: string;
   game: string;
@@ -18,15 +11,6 @@ export type TopPlayer = {
   player: string;
   score: number;
 };
-
-export const GAMES: Game[] = [
-  { id: "bloque-buster", title: "BLOQUE BUSTER", cat: "ARCADE", cover: "cover-bricks" },
-  { id: "caida", title: "CAÍDA", cat: "PUZZLE", cover: "cover-tetro" },
-  { id: "serpentina", title: "SERPENTINA", cat: "ARCADE", cover: "cover-snake" },
-  { id: "gloton", title: "GLOTÓN", cat: "ARCADE", cover: "cover-glot" },
-  { id: "invasores", title: "INVASORES", cat: "SHOOTER", cover: "cover-invaders" },
-  { id: "rocas", title: "ROCAS", cat: "SHOOTER", cover: "cover-rocas" },
-];
 
 export const ACTIVITY: ActivityEntry[] = [
   { player: "NEONFOX", game: "Caída", score: 184220, time: "hace 2 min", color: "magenta" },
