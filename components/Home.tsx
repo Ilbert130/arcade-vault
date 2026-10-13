@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ACTIVITY, GAMES, TOP_PLAYERS, type Game } from "@/lib/mock-data";
+import { ACTIVITY, TOP_PLAYERS } from "@/lib/mock-data";
+import type { Game } from "@/lib/games/types";
 
 function useReveal() {
   useEffect(() => {
@@ -199,7 +200,7 @@ const FEATURES = [
   {
     i: "GAMEPAD" as const,
     t: "JUEGOS CLÁSICOS",
-    d: "Arkanoid, Tetris, Snake y muchos más. Los mejores arcades de todos los tiempos en un solo lugar.",
+    d: "Asteroids, Tetris, Arkanoid y muchos más por venir. Los mejores arcades de todos los tiempos en un solo lugar.",
     c: "cyan",
   },
   {
@@ -222,14 +223,15 @@ const FEATURES = [
   },
 ];
 
-const STATS = [
-  { n: "12+", u: "JUEGOS", s: "Y CONTANDO" },
-  { n: "MILES", u: "DE PARTIDAS", s: "JUGADAS CADA DÍA" },
-  { n: "GLOBAL", u: "RANKING", s: "COMPITE CON EL MUNDO" },
-];
-
-export default function Home() {
+export default function Home({ games }: { games: Game[] }) {
   useReveal();
+
+  const stats = [
+    { n: String(games.length), u: "JUEGOS", s: "Y CONTANDO" },
+    { n: "MILES", u: "DE PARTIDAS", s: "JUGADAS CADA DÍA" },
+    { n: "GLOBAL", u: "RANKING", s: "COMPITE CON EL MUNDO" },
+  ];
+  const activity = ACTIVITY.filter((a) => games.some((g) => g.title.toLowerCase() === a.game.toLowerCase()));
   const router = useRouter();
 
   const goBiblioteca = () => router.push("/biblioteca");
@@ -296,7 +298,7 @@ export default function Home() {
           <div className="section-rule"></div>
         </div>
         <div className="mini-rail">
-          {GAMES.slice(0, 6).map((g) => (
+          {games.slice(0, 6).map((g) => (
             <MiniCard key={g.id} game={g} onClick={goBiblioteca} />
           ))}
         </div>
@@ -310,7 +312,7 @@ export default function Home() {
       {/* STATS */}
       <section className="home-stats reveal">
         <div className="stats-inner">
-          {STATS.map((st, i) => (
+          {stats.map((st, i) => (
             <div key={i} className="stat-block" style={{ transitionDelay: i * 90 + "ms" }}>
               <div className="stat-n neon-yellow">{st.n}</div>
               <div className="stat-u pixel">{st.u}</div>
@@ -333,7 +335,7 @@ export default function Home() {
               <div className="ac-title pixel">▸ ÚLTIMAS PUNTUACIONES</div>
             </div>
             <div className="ticker">
-              {ACTIVITY.map((r, i) => (
+              {activity.map((r, i) => (
                 <div key={i} className="tick-row" style={{ animationDelay: i * 60 + "ms" }}>
                   <span className={"tk-p neon-" + r.color}>{r.player}</span>
                   <span className="tk-mid">▸ {r.game}</span>
