@@ -2,6 +2,7 @@
 import type { ComponentType } from "react";
 import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
 import TetrisCanvas from "@/components/games/TetrisCanvas";
+import BloqueBusterCanvas from "@/components/games/BloqueBusterCanvas";
 export type GameStatus = "ready" | "playing" | "paused" | "over";
 export type HudField = "score" | "lives" | "level" | "lines";
 // Superconjunto de los HUD de cada motor; GamePlayer solo lee los campos de `entry.hud`.
@@ -38,6 +39,13 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     controls:
       "← → MOVER · ↑ ROTAR · ↓ CAÍDA SUAVE · ESPACIO CAÍDA DURA · P PAUSA",
     startTitle: "CAÍDA",
+    startHint: "PULSA ESPACIO PARA EMPEZAR",
+  },
+  "bloque-buster": {
+    Canvas: BloqueBusterCanvas,
+    hud: ["score", "lives", "level"],
+    controls: "← → MOVER PALA · RATÓN MOVER PALA · P PAUSA",
+    startTitle: "BLOQUE BUSTER",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
   },
 };
