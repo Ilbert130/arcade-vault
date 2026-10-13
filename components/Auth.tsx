@@ -1,72 +1,141 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { setUser } from "@/lib/session";
-
+import { signIn, signUp } from "@/app/auth/actions";
+type Status = "idle" | "sending" | "error";
 export default function Auth() {
   const router = useRouter();
   const [tab, setTab] = useState<"in" | "up">("in");
   const [user, setUserField] = useState("");
   const [pass, setPass] = useState("");
   const [email, setEmail] = useState("");
-
-  const submit = (e: React.FormEvent) => {
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState("");
+  const sending = status === "sending";
+  const switchTab = (next: "in" | "up") => {
+    setTab(next);
+    setStatus("idle");
+    setErrorMsg("");
+  };
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUser({ name: (user || "PLAYER1").toUpperCase().slice(0, 10) });
-    router.push("/biblioteca");
+    if (sending) return;
+    setStatus("sending");
+    setErrorMsg("");
+    const result =
+      tab === "in"
+        ? await signIn({ email, password: pass })
+        : await signUp({ username: user, email, password: pass });
+    if (result.ok) {
+      router.push("/biblioteca");
+      router.refresh();
+    } else {
+      setStatus("error");
+      setErrorMsg(result.error);
+    }
   };
-
   const playAsGuest = () => {
-    setUser(null);
     router.push("/biblioteca");
   };
-
   return (
     <div className="av-auth-wrap fade-in">
       <div className="auth-card">
         <div className="auth-header">
           <div className="mark"></div>
           <h2 className="neon-cyan">ARCADE VAULT</h2>
-          <div className="mono" style={{ fontSize: 11, color: "var(--ink-faint)", letterSpacing: "0.16em", marginTop: 6 }}>
+          <div
+            className="mono"
+            style={{
+              fontSize: 11,
+              color: "var(--ink-faint)",
+              letterSpacing: "0.16em",
+              marginTop: 6,
+            }}
+          >
             ACCESO AL SISTEMA · v2.6
           </div>
         </div>
-
         <div className="auth-tabs">
-          <button className={tab === "in" ? "on" : ""} onClick={() => setTab("in")}>
+          <button
+            className={tab === "in" ? "on" : ""}
+            onClick={() => switchTab("in")}
+            disabled={sending}
+          >
             INICIAR SESIÓN
           </button>
-          <button className={tab === "up" ? "on" : ""} onClick={() => setTab("up")}>
+          <button
+            className={tab === "up" ? "on" : ""}
+            onClick={() => switchTab("up")}
+            disabled={sending}
+          >
             CREAR CUENTA
           </button>
         </div>
-
         <form onSubmit={submit}>
-          <div className="field">
-            <label>Usuario</label>
-            <input value={user} onChange={(e) => setUserField(e.target.value)} placeholder="px_kai" />
-          </div>
           {tab === "up" && (
             <div className="field slide-in">
-              <label>Correo electrónico</label>
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="jugador@vault.gg" />
+              <label htmlFor="auth-user">Usuario</label>
+              <input
+                id="auth-user"
+                value={user}
+                onChange={(e) => setUserField(e.target.value)}
+                placeholder="px_kai"
+                autoComplete="username"
+                autoCapitalize="characters"
+                maxLength={10}
+              />
             </div>
           )}
           <div className="field">
-            <label>Contraseña</label>
-            <input type="password" value={pass} onChange={(e) => setPass(e.target.value)} placeholder="••••••••" />
+            <label htmlFor="auth-email">Correo electrónico</label>
+            <input
+              id="auth-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="jugador@vault.gg"
+              autoComplete="email"
+            />
           </div>
-
-          <button className="btn lg" type="submit" style={{ width: "100%", marginTop: 8 }}>
-            {tab === "in" ? "ENTRAR AL VAULT" : "CREAR Y JUGAR"}
+          <div className="field">
+            <label htmlFor="auth-pass">Contraseña</label>
+            <input
+              id="auth-pass"
+              type="password"
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+              placeholder="••••••••"
+              autoComplete={tab === "in" ? "current-password" : "new-password"}
+            />
+          </div>
+          {status === "error" && (
+            <div className="auth-error" role="alert">
+              {errorMsg}
+            </div>
+          )}
+          <button
+            className="btn lg"
+            type="submit"
+            disabled={sending}
+            style={{ width: "100%", marginTop: 8 }}
+          >
+            {sending
+              ? tab === "in"
+                ? "▶  ENTRANDO…"
+                : "▶  CREANDO CUENTA…"
+              : tab === "in"
+                ? "ENTRAR AL VAULT"
+                : "CREAR Y JUGAR"}
           </button>
         </form>
-
-        <button className="btn ghost" style={{ width: "100%", marginTop: 10 }} onClick={playAsGuest}>
+        <button
+          className="btn ghost"
+          style={{ width: "100%", marginTop: 10 }}
+          onClick={playAsGuest}
+          disabled={sending}
+        >
           JUGAR COMO INVITADO
         </button>
-
         <div className="auth-divider">O CONTINÚA CON</div>
         <div className="social">
           <button className="btn ghost" type="button">
@@ -76,8 +145,15 @@ export default function Auth() {
             ▣ GITHUB
           </button>
         </div>
-
-        <div style={{ marginTop: 18, textAlign: "center", fontSize: 11, color: "var(--ink-faint)", letterSpacing: "0.1em" }}>
+        <div
+          style={{
+            marginTop: 18,
+            textAlign: "center",
+            fontSize: 11,
+            color: "var(--ink-faint)",
+            letterSpacing: "0.1em",
+          }}
+        >
           AL ENTRAR ACEPTAS LOS TÉRMINOS DEL SALÓN ARCADE
         </div>
       </div>
