@@ -35,6 +35,7 @@ Env vars (see `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE
 - `/add-game` (project skill in `.claude/skills/add-game/`): use it whenever a game is added, ported or made playable. It covers the TS engine, canvas component, registry entry, `playable` migration and leaderboard wiring, with references (`engine-contract.md`, `game-registry.md`, `leaderboard-integration.md`, `porting-vanilla-js.md`) and templates for the spec and the migration.
 - `/spec` and `/spec-impl` (from `Klerith/fernando-skills`): Spec Driven Design flow, see Workflow.
 - `/worktree <task>` (user-level skill): runs the task in an isolated git worktree under `.trees/<name>`, on its own branch.
+- `game-planner` subagent (`.claude/agents/game-planner.md`): plans and decides which game fits the platform next; read-only on code, keeps a versioned memory of past suggestions (proposed/accepted/rejected/implemented) in `.claude/agent-memory/game-planner/MEMORY.md`; its output is a spec-ready card for `/add-game <id>`.
 
 ## Before writing code
 
