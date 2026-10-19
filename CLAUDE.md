@@ -36,6 +36,7 @@ Env vars (see `.env.example`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE
 - `/spec` and `/spec-impl` (from `Klerith/fernando-skills`): Spec Driven Design flow, see Workflow.
 - `/worktree <task>` (user-level skill): runs the task in an isolated git worktree under `.trees/<name>`, on its own branch.
 - `game-planner` subagent (`.claude/agents/game-planner.md`): plans and decides which game fits the platform next; read-only on code, keeps a versioned memory of past suggestions (proposed/accepted/rejected/implemented) in `.claude/agent-memory/game-planner/MEMORY.md`; its output is a spec-ready card for `/add-game <id>`.
+- `/game-jam <tema>` (project skill in `.claude/skills/game-jam/`): runs a game jam on a theme. Launches 3 `game-jam-designer` subagents (`.claude/agents/game-jam/`) in parallel with different angles (A acción, B puzzle, C wildcard/versus), each writing a pitch + full spec; the main session judges them with `references/rubrica.md`, writes `veredicto.md`, copies the winner to `specs/NN-<id>.md` and logs the 3 ideas in game-planner's memory. Results live in `game-jam/<fecha>-<tema>/` (see `game-jam/README.md`).
 
 ## Before writing code
 
