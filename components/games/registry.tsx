@@ -1,5 +1,6 @@
 "use client";
 import type { ComponentType } from "react";
+import type { SkinId } from "@/lib/games/skins";
 import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
 import TetrisCanvas from "@/components/games/TetrisCanvas";
 import BloqueBusterCanvas from "@/components/games/BloqueBusterCanvas";
@@ -15,6 +16,7 @@ export type GenericHud = {
 };
 export type GameRenderProps = {
   status: GameStatus;
+  skin: SkinId;
   onHud: (hud: GenericHud) => void;
   onGameOver: (finalScore: number) => void;
 };

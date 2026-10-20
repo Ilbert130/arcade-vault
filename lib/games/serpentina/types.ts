@@ -1,3 +1,4 @@
+import type { SkinId } from "../skins";
 export type SerpentinaHud = {
   score: number;
   level: number;
@@ -13,6 +14,7 @@ export type SerpentinaGame = {
   pause: () => void; // congela update (sigue dibujando el último frame)
   resume: () => void; // continúa; reinicia el reloj de dt
   reset: () => void; // estado inicial sin arrancar
+  setSkin: (id: SkinId) => void; // cambia la skin y redibuja (solo cosmético)
   destroy: () => void; // cancela rAF y elimina listeners
 };
 /** Celda de la rejilla (col, row), no píxeles. */

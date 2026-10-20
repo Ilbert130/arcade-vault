@@ -18,6 +18,7 @@ import {
   TOTAL_CELLS,
   W,
 } from "./constants";
+import { DEFAULT_SKIN, type SkinId } from "../skins";
 import {
   cellEquals,
   drawBackground,
@@ -25,7 +26,9 @@ import {
   drawSnake,
   loadFruitsImage,
   spawnFruit,
+  tintAtlas,
 } from "./entities";
+import { SKINS } from "./skins";
 import type {
   Cell,
   Direction,
@@ -63,6 +66,7 @@ function initialSnake(): Cell[] {
 export function createSerpentinaGame(
   canvas: HTMLCanvasElement,
   callbacks: SerpentinaCallbacks,
+  initialSkin: SkinId = DEFAULT_SKIN,
 ): SerpentinaGame {
   const ctxOrNull = canvas.getContext("2d");
   if (!ctxOrNull) throw new Error("Canvas 2D no disponible");
@@ -84,6 +88,7 @@ export function createSerpentinaGame(
   let destroyed = false;
   let gameOverEmitted = false;
   let lastHud: SerpentinaHud | null = null;
+  let skinId: SkinId = initialSkin;
   // ── Assets (por instancia, nada a nivel de módulo) ──────────────────────────
   let imageState: ImageState = "loading";
   const fruits = loadFruitsImage(
@@ -96,6 +101,16 @@ export function createSerpentinaGame(
       if (!destroyed && rafId === null) draw();
     },
   );
+  // Atlas tintado por skin, creado una sola vez cuando la imagen está lista.
+  const tintedAtlas = new Map<SkinId, CanvasImageSource | null>();
+  function fruitSource(): CanvasImageSource | null {
+    if (imageState !== "ready") return null;
+    const tint = SKINS[skinId].fruitTint;
+    if (!tint) return fruits.img;
+    if (!tintedAtlas.has(skinId))
+      tintedAtlas.set(skinId, tintAtlas(fruits.img, tint));
+    return tintedAtlas.get(skinId) ?? fruits.img;
+  }
   // ── HUD hacia React ─────────────────────────────────────────────────────────
   function emitHud() {
     if (lastHud && lastHud.score === score && lastHud.level === level) return;
@@ -187,11 +202,11 @@ export function createSerpentinaGame(
   function draw() {
     syncResolution();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    drawBackground(ctx);
+    const skin = SKINS[skinId];
+    drawBackground(ctx, skin);
     if (imageState === "loading") return;
-    if (fruit)
-      drawFruit(ctx, imageState === "ready" ? fruits.img : null, fruit);
-    drawSnake(ctx, snake, direction);
+    if (fruit) drawFruit(ctx, fruitSource(), fruit, skin);
+    drawSnake(ctx, snake, direction, skin);
   }
   // ── Bucle ───────────────────────────────────────────────────────────────────
   function loop(ts: number) {
@@ -249,8 +264,15 @@ export function createSerpentinaGame(
       emitHud();
       draw();
     },
+    setSkin(id) {
+      if (id === skinId) return;
+      skinId = id;
+      // Sin bucle activo (ready / over) se redibuja ya; con bucle, en el siguiente frame.
+      if (!destroyed && rafId === null) draw();
+    },
     destroy() {
       destroyed = true;
+      tintedAtlas.clear();
       fruits.dispose();
       if (rafId !== null) cancelAnimationFrame(rafId);
       rafId = null;

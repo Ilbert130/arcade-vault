@@ -1,3 +1,4 @@
+import type { SkinId } from "../skins";
 export type BloqueBusterHud = {
   score: number;
   lives: number;
@@ -14,6 +15,7 @@ export type BloqueBusterGame = {
   pause: () => void; // congela update (sigue dibujando el último frame)
   resume: () => void; // continúa; reinicia el reloj de dt
   reset: () => void; // estado inicial sin arrancar
+  setSkin: (id: SkinId) => void; // cambia la skin y redibuja (solo cosmético)
   destroy: () => void; // cancela rAF y elimina listeners
 };
 export type BlockColor =

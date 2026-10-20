@@ -71,14 +71,4 @@ export const FRUIT_ATLAS: Record<FruitName, SpriteRect> = {
   melon: { x: 3637, y: 136, w: 130, h: 160 },
 };
 export const FRUIT_NAMES = Object.keys(FRUIT_ATLAS) as FruitName[];
-// ── Paleta (tokens CRT: --green #00ff88) ──────────────────────────────────────
-export const PALETTE = {
-  bg: "#000000",
-  grid: "rgba(0, 255, 136, 0.05)",
-  body: "#00ff88",
-  bodyDark: "#00b862",
-  glow: "rgba(0, 255, 136, 0.6)",
-  eyeWhite: "#ffffff",
-  eyePupil: "#000000",
-  fallbackFruit: "#ff3366",
-} as const;
+// La paleta vive en ./skins.ts (SKINS.clasico es el aspecto original).

@@ -1,3 +1,4 @@
+import type { SkinId } from "@/lib/games/skins";
 export type AsteroidsHud = {
   score: number;
   lives: number;
@@ -14,6 +15,7 @@ export type AsteroidsGame = {
   pause: () => void; // congela update (sigue dibujando el último frame)
   resume: () => void; // continúa; reinicia el reloj de dt
   reset: () => void; // estado inicial (score 0, lives 3, level 1) sin arrancar
+  setSkin: (id: SkinId) => void; // cambia la skin (solo cosmética) y redibuja
   destroy: () => void; // cancela rAF y elimina listeners de teclado
 };
 /** Mapa de teclas presionadas, indexado por `KeyboardEvent.code`. */

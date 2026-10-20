@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,11 +8,94 @@ import type { Game } from "@/lib/games/types";
 import { getCurrentUsername } from "@/lib/supabase/client";
 import { GAME_REGISTRY } from "@/components/games/registry";
 import type { GameStatus, GenericHud } from "@/components/games/registry";
+import {
+  DEFAULT_SKIN,
+  SKIN_IDS,
+  SKIN_LABELS,
+  isSkinId,
+} from "@/lib/games/skins";
+import type { SkinId } from "@/lib/games/skins";
 const START_LIVES = 3;
 // Tras pulsar un botón se le quita el foco para que Espacio no vuelva a activarlo.
 const blurTarget = (e: MouseEvent<HTMLButtonElement>) => e.currentTarget.blur();
 const togglePause = (s: GameStatus): GameStatus =>
   s === "playing" ? "paused" : s === "paused" ? "playing" : s;
+// ── Skin por juego (solo cosmética), recordada en localStorage ──────────────
+const SKIN_EVENT = "av-skin-change";
+const skinKey = (gameId: string) => `av-skin:${gameId}`;
+// Respaldo en memoria si localStorage no está disponible (modo privado, cuota…).
+const memorySkins: Record<string, SkinId> = {};
+function readSkin(gameId: string): SkinId {
+  const mem = memorySkins[gameId];
+  if (mem) return mem;
+  try {
+    const stored = window.localStorage.getItem(skinKey(gameId));
+    return isSkinId(stored) ? stored : DEFAULT_SKIN;
+  } catch {
+    return DEFAULT_SKIN;
+  }
+}
+function writeSkin(gameId: string, skin: SkinId) {
+  memorySkins[gameId] = skin;
+  try {
+    window.localStorage.setItem(skinKey(gameId), skin);
+  } catch {
+    // Sin persistencia: la elección dura lo que la pestaña.
+  }
+  window.dispatchEvent(new Event(SKIN_EVENT));
+}
+function subscribeSkin(onChange: () => void) {
+  // Otra pestaña cambió la skin: manda localStorage, no la copia en memoria.
+  const onStorage = (e: StorageEvent) => {
+    if (e.key?.startsWith("av-skin:"))
+      delete memorySkins[e.key.slice("av-skin:".length)];
+    onChange();
+  };
+  window.addEventListener(SKIN_EVENT, onChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(SKIN_EVENT, onChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+function SkinSwitch({
+  value,
+  onChange,
+}: {
+  value: SkinId;
+  onChange: (skin: SkinId) => void;
+}) {
+  return (
+    <div className="skin-switch">
+      <span className="skin-switch-label" id="skin-switch-label">
+        ASPECTO
+      </span>
+      <div
+        className="skin-switch-group"
+        role="group"
+        aria-labelledby="skin-switch-label"
+      >
+        {SKIN_IDS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            className={`skin-opt skin-${id}${value === id ? " on" : ""}`}
+            aria-pressed={value === id}
+            // Sin foco al pulsar con el ratón: el teclado sigue en el juego.
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              blurTarget(e);
+              onChange(id);
+            }}
+          >
+            <span className="skin-led" aria-hidden="true" />
+            {SKIN_LABELS[id]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 type SaveState =
   { status: "idle" | "saving" | "saved" } | { status: "error"; error: string };
 export default function GamePlayer({ game }: { game: Game }) {
@@ -20,6 +103,13 @@ export default function GamePlayer({ game }: { game: Game }) {
   const entry = GAME_REGISTRY[game.id];
   const isReal = !!entry;
   const hudFields = entry?.hud ?? ["score", "lives", "level"];
+  // En el servidor (y en la hidratación) siempre CLÁSICO; luego, la guardada.
+  const skin = useSyncExternalStore(
+    subscribeSkin,
+    () => readSkin(game.id),
+    () => DEFAULT_SKIN,
+  );
+  const changeSkin = (next: SkinId) => writeSkin(game.id, next);
   const [score, setScore] = useState(0);
   const scoreRef = useRef(0);
   const [lives, setLives] = useState(START_LIVES);
@@ -181,11 +271,13 @@ export default function GamePlayer({ game }: { game: Game }) {
           </button>
         </div>
       </div>
+      {entry && <SkinSwitch value={skin} onChange={changeSkin} />}
       <div className="crt">
         <div className="crt-screen">
           {entry ? (
             <entry.Canvas
               status={status}
+              skin={skin}
               onHud={handleHud}
               onGameOver={handleGameOver}
             />
