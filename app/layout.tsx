@@ -1,35 +1,38 @@
 import type { Metadata } from "next";
-import { Press_Start_2P, JetBrains_Mono, Courier_Prime } from "next/font/google";
+import {
+  Press_Start_2P,
+  JetBrains_Mono,
+  Courier_Prime,
+} from "next/font/google";
 import Nav from "@/components/Nav";
 import "./globals.css";
-
 const pixelFont = Press_Start_2P({
   variable: "--font-pixel",
   weight: "400",
   subsets: ["latin"],
 });
-
 const monoFont = JetBrains_Mono({
   variable: "--font-mono",
   subsets: ["latin"],
 });
-
 const courierFont = Courier_Prime({
   variable: "--font-courier",
   weight: ["400", "700"],
   subsets: ["latin"],
 });
-
 export const metadata: Metadata = {
   title: "Arcade Vault · Portal Retro",
-  description: "Arcade Vault: juega en línea y compite en la tabla de puntuaciones.",
+  description:
+    "Arcade Vault: juega en línea y compite en la tabla de puntuaciones.",
 };
-
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // suppressHydrationWarning: algunos navegadores (Chrome en iOS) inyectan atributos en
+    // <html> antes de hidratar; solo afecta a los atributos de este elemento, no a sus hijos.
     <html
       lang="es"
       className={`${pixelFont.variable} ${monoFont.variable} ${courierFont.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full">
         <div className="av-bg" />

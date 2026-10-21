@@ -4,7 +4,7 @@ Fuente: spec 05 y `lib/games/asteroids/`, `components/games/AsteroidsCanvas.tsx`
 
 ## Archivos
 ```
-lib/games/<slug>/types.ts       Hud, Callbacks, Game, KeyMap
+lib/games/<slug>/types.ts       Hud, Callbacks, Game, XAction (unión de acciones de entrada)
 lib/games/<slug>/constants.ts   W/H lógicos, PALETTE (hex copiados de los tokens de globals.css), tuning
 lib/games/<slug>/entities.ts    clases/helpers con draw(ctx) por parámetro (sin globals)
 lib/games/<slug>/engine.ts      createXGame(canvas, callbacks): Game
@@ -24,7 +24,12 @@ export type XGame = {
   resume: () => void;  // continúa; reinicia lastTime para no saltar dt
   reset: () => void;   // estado inicial sin arrancar
   destroy: () => void; // cancela rAF y quita listeners
+  press: (action: string) => void;   // = keydown de la acción; desconocidas se ignoran
+  release: (action: string) => void; // = keyup de la acción
+  releaseAll: () => void;            // suelta todas las acciones mantenidas
 };
+/** Acciones de entrada del motor (teclado y mando táctil), p. ej. ROCAS: */
+export type XAction = "rotateLeft" | "rotateRight" | "thrust" | "fire";
 ```
 `score` siempre es obligatorio (es lo que se guarda). Los demás campos del HUD dependen del juego (Tetris: `lines`, `level`; Arkanoid: `lives`, `level`).
 
@@ -35,12 +40,17 @@ export type XGame = {
 - Bucle rAF con `dt` en segundos limitado a `MAX_DT` (0.05).
 - El constructor inicializa estado y dibuja un primer frame (visible con status `ready`).
 - Teclas en `window`, añadidas en `start()` y quitadas en `destroy()`; `code` de `KeyboardEvent`.
+- **API de entrada (spec 12)**: el motor expone `press/release/releaseAll` (cumple `GameInput` de `lib/games/touch.ts`). El teclado no toca el estado directamente: un mapa `KEY_ACTIONS` traduce `e.code` → acción y llama a `press`/`release`, conservando `preventDefault` y el filtro de `e.repeat` donde aplique. El mando táctil llama a las mismas funciones, así que ambos se comportan igual.
+  - Las acciones solo tienen efecto con `phase === "playing"` (igual que el teclado); las desconocidas se ignoran.
+  - Acciones mantenidas (girar, mover la pala…) en un mapa por acción (`keys[action]`); `releaseAll` lo vacía y se reutiliza en `pause()`/`reset()`.
+  - Acciones de una pulsación (rotar, caída dura, girar la serpiente) se ejecutan en `press`; si el juego no tiene estado mantenido, `release`/`releaseAll` son no-ops pero existen.
+  - La repetición al mantener la hace el mando (`repeat: true` en su `touch`), no el motor. Ejemplos: `lib/games/tetris/engine.ts` (pulsación + `ONCE_ACTIONS`), `lib/games/bloque-buster/engine.ts` (mantenidas), `lib/games/serpentina/engine.ts` (`press(dir)` → `queueTurn`).
 - La fuente se lee con `getComputedStyle(canvas).getPropertyValue("--mono")`.
 - El motor no dibuja menús, pausa ni "game over": eso lo pinta React (overlays de `GamePlayer`). Puede dibujar el HUD in-game mínimo si el juego lo necesita, pero score/vidas/nivel salen por `onHud`.
 
 ## Componente canvas
-Props `{ status, onHud, onGameOver }` con `status: "ready" | "playing" | "paused" | "over"`.
-- `useEffect([])` crea el motor y devuelve `destroy()`; callbacks por refs (evita callbacks viejos y doble montaje de StrictMode).
+Props `{ status, skin, onHud, onGameOver, inputRef }` con `status: "ready" | "playing" | "paused" | "over"` e `inputRef: RefObject<GameInput | null>`.
+- `useEffect([inputRef])` crea el motor, asigna `inputRef.current = game` y en la limpieza pone `inputRef.current = null` **antes** de `destroy()` (con StrictMode el ref nunca apunta a un motor destruido); callbacks por refs (evita callbacks viejos y doble montaje de StrictMode).
 - `useEffect([status])` con `prevStatusRef` mapea transiciones:
 
 | Transición | Llamada |

@@ -1,5 +1,12 @@
 "use client";
-import type { ComponentType } from "react";
+import type { ComponentType, RefObject } from "react";
+import type { SkinId } from "@/lib/games/skins";
+import type { GameInput, TouchLayout } from "@/lib/games/touch";
+import { touchLayout } from "@/lib/games/touch";
+import type { AsteroidsAction } from "@/lib/games/asteroids/types";
+import type { TetrisAction } from "@/lib/games/tetris/types";
+import type { BloqueBusterAction } from "@/lib/games/bloque-buster/types";
+import type { SerpentinaAction } from "@/lib/games/serpentina/types";
 import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
 import TetrisCanvas from "@/components/games/TetrisCanvas";
 import BloqueBusterCanvas from "@/components/games/BloqueBusterCanvas";
@@ -15,8 +22,10 @@ export type GenericHud = {
 };
 export type GameRenderProps = {
   status: GameStatus;
+  skin: SkinId;
   onHud: (hud: GenericHud) => void;
   onGameOver: (finalScore: number) => void;
+  inputRef: RefObject<GameInput | null>;
 };
 export type GameEntry = {
   Canvas: ComponentType<GameRenderProps>;
@@ -24,6 +33,7 @@ export type GameEntry = {
   controls: string;
   startTitle: string;
   startHint: string;
+  touch: TouchLayout;
 };
 // Juegos con motor real. Los que no estén aquí usan la simulación de GamePlayer.
 export const GAME_REGISTRY: Record<string, GameEntry> = {
@@ -33,6 +43,12 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     controls: "← → ROTAR · ↑ PROPULSAR · ESPACIO DISPARAR · P PAUSA",
     startTitle: "ROCAS",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
+    touch: touchLayout<AsteroidsAction>([
+      { slot: "left", action: "rotateLeft", label: "GIRAR" },
+      { slot: "right", action: "rotateRight", label: "GIRAR" },
+      { slot: "up", action: "thrust", label: "PROPULSAR" },
+      { slot: "a", action: "fire", label: "DISPARAR" },
+    ]),
   },
   caida: {
     Canvas: TetrisCanvas,
@@ -41,6 +57,13 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
       "← → MOVER · ↑ ROTAR · ↓ CAÍDA SUAVE · ESPACIO CAÍDA DURA · P PAUSA",
     startTitle: "CAÍDA",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
+    touch: touchLayout<TetrisAction>([
+      { slot: "left", action: "moveLeft", label: "MOVER", repeat: true },
+      { slot: "right", action: "moveRight", label: "MOVER", repeat: true },
+      { slot: "down", action: "softDrop", label: "BAJAR", repeat: true },
+      { slot: "a", action: "rotate", label: "ROTAR" },
+      { slot: "b", action: "hardDrop", label: "SOLTAR" },
+    ]),
   },
   "bloque-buster": {
     Canvas: BloqueBusterCanvas,
@@ -48,6 +71,10 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     controls: "← → MOVER PALA · RATÓN MOVER PALA · P PAUSA",
     startTitle: "BLOQUE BUSTER",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
+    touch: touchLayout<BloqueBusterAction>([
+      { slot: "left", action: "left", label: "MOVER" },
+      { slot: "right", action: "right", label: "MOVER" },
+    ]),
   },
   serpentina: {
     Canvas: SerpentinaCanvas,
@@ -55,5 +82,11 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     controls: "← ↑ → ↓ / WASD MOVER · P PAUSA",
     startTitle: "SERPENTINA",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
+    touch: touchLayout<SerpentinaAction>([
+      { slot: "up", action: "up", label: "" },
+      { slot: "down", action: "down", label: "" },
+      { slot: "left", action: "left", label: "" },
+      { slot: "right", action: "right", label: "" },
+    ]),
   },
 };

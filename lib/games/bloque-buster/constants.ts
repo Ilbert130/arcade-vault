@@ -55,9 +55,6 @@ export const explosionFrame = (color: BlockColor, i: number): SpriteRect => ({
   sw: 32,
   sh: 16,
 });
-export const PALETTE = {
-  bg: "#000000",
-} as const;
 // ── Niveles ───────────────────────────────────────────────────────────────────
 function buildLevels(): Level[] {
   const rows1: BlockColor[] = [

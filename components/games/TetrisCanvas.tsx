@@ -1,17 +1,21 @@
 "use client";
 import { useEffect, useRef } from "react";
+import type { RefObject } from "react";
 import { createTetrisGame } from "@/lib/games/tetris/engine";
 import type { TetrisGame, TetrisHud } from "@/lib/games/tetris/types";
+import type { GameInput } from "@/lib/games/touch";
 export type TetrisStatus = "ready" | "playing" | "paused" | "over";
 type TetrisCanvasProps = {
   status: TetrisStatus;
   onHud: (hud: TetrisHud) => void;
   onGameOver: (finalScore: number) => void;
+  inputRef?: RefObject<GameInput | null>;
 };
 export default function TetrisCanvas({
   status,
   onHud,
   onGameOver,
+  inputRef,
 }: TetrisCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<TetrisGame | null>(null);
@@ -31,12 +35,15 @@ export default function TetrisCanvas({
       onGameOver: (finalScore) => onGameOverRef.current(finalScore),
     });
     gameRef.current = game;
+    if (inputRef) inputRef.current = game;
     prevStatusRef.current = "ready";
     return () => {
+      // Antes de destroy(): con StrictMode, el ref no apunta a un motor destruido.
+      if (inputRef) inputRef.current = null;
       game.destroy();
       gameRef.current = null;
     };
-  }, []);
+  }, [inputRef]);
   useEffect(() => {
     const game = gameRef.current;
     const prev = prevStatusRef.current;

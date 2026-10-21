@@ -1,3 +1,4 @@
+import type { SkinId } from "../skins";
 export type SerpentinaHud = {
   score: number;
   level: number;
@@ -13,11 +14,17 @@ export type SerpentinaGame = {
   pause: () => void; // congela update (sigue dibujando el último frame)
   resume: () => void; // continúa; reinicia el reloj de dt
   reset: () => void; // estado inicial sin arrancar
+  setSkin: (id: SkinId) => void; // cambia la skin y redibuja (solo cosmético)
   destroy: () => void; // cancela rAF y elimina listeners
+  press: (action: string) => void; // = keydown de la acción; desconocidas se ignoran
+  release: (action: string) => void; // = keyup de la acción
+  releaseAll: () => void; // suelta todas las acciones mantenidas
 };
 /** Celda de la rejilla (col, row), no píxeles. */
 export type Cell = { col: number; row: number };
 export type Direction = "up" | "down" | "left" | "right";
+/** Acciones de entrada del motor (teclado y mando táctil): una por dirección. */
+export type SerpentinaAction = Direction;
 export type FruitName =
   | "banana"
   | "orange"

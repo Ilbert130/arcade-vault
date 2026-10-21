@@ -15,7 +15,13 @@ export type TetrisGame = {
   resume: () => void; // continúa; reinicia el reloj de dt
   reset: () => void; // estado inicial (score 0, lines 0, level 1) sin arrancar
   destroy: () => void; // cancela rAF y elimina listeners de teclado
+  press: (action: string) => void; // = keydown de la acción; desconocidas se ignoran
+  release: (action: string) => void; // = keyup de la acción
+  releaseAll: () => void; // suelta todas las acciones mantenidas
 };
+/** Acciones de entrada del motor (teclado y mando táctil). */
+export type TetrisAction =
+  "moveLeft" | "moveRight" | "softDrop" | "rotate" | "hardDrop";
 /** Matriz de celdas: 0 = vacío, 1–8 = índice de color/pieza (I, O, T, S, Z, J, L, N). */
 export type Matrix = number[][];
 /** Tablero ROWS×COLS con las celdas ya fijadas. */

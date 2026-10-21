@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,11 +8,96 @@ import type { Game } from "@/lib/games/types";
 import { getCurrentUsername } from "@/lib/supabase/client";
 import { GAME_REGISTRY } from "@/components/games/registry";
 import type { GameStatus, GenericHud } from "@/components/games/registry";
+import TouchPad from "@/components/games/TouchPad";
+import type { GameInput } from "@/lib/games/touch";
+import {
+  DEFAULT_SKIN,
+  SKIN_IDS,
+  SKIN_LABELS,
+  isSkinId,
+} from "@/lib/games/skins";
+import type { SkinId } from "@/lib/games/skins";
 const START_LIVES = 3;
 // Tras pulsar un botón se le quita el foco para que Espacio no vuelva a activarlo.
 const blurTarget = (e: MouseEvent<HTMLButtonElement>) => e.currentTarget.blur();
 const togglePause = (s: GameStatus): GameStatus =>
   s === "playing" ? "paused" : s === "paused" ? "playing" : s;
+// ── Skin por juego (solo cosmética), recordada en localStorage ──────────────
+const SKIN_EVENT = "av-skin-change";
+const skinKey = (gameId: string) => `av-skin:${gameId}`;
+// Respaldo en memoria si localStorage no está disponible (modo privado, cuota…).
+const memorySkins: Record<string, SkinId> = {};
+function readSkin(gameId: string): SkinId {
+  const mem = memorySkins[gameId];
+  if (mem) return mem;
+  try {
+    const stored = window.localStorage.getItem(skinKey(gameId));
+    return isSkinId(stored) ? stored : DEFAULT_SKIN;
+  } catch {
+    return DEFAULT_SKIN;
+  }
+}
+function writeSkin(gameId: string, skin: SkinId) {
+  memorySkins[gameId] = skin;
+  try {
+    window.localStorage.setItem(skinKey(gameId), skin);
+  } catch {
+    // Sin persistencia: la elección dura lo que la pestaña.
+  }
+  window.dispatchEvent(new Event(SKIN_EVENT));
+}
+function subscribeSkin(onChange: () => void) {
+  // Otra pestaña cambió la skin: manda localStorage, no la copia en memoria.
+  const onStorage = (e: StorageEvent) => {
+    if (e.key?.startsWith("av-skin:"))
+      delete memorySkins[e.key.slice("av-skin:".length)];
+    onChange();
+  };
+  window.addEventListener(SKIN_EVENT, onChange);
+  window.addEventListener("storage", onStorage);
+  return () => {
+    window.removeEventListener(SKIN_EVENT, onChange);
+    window.removeEventListener("storage", onStorage);
+  };
+}
+function SkinSwitch({
+  value,
+  onChange,
+}: {
+  value: SkinId;
+  onChange: (skin: SkinId) => void;
+}) {
+  return (
+    <div className="skin-switch">
+      <span className="skin-switch-label" id="skin-switch-label">
+        ASPECTO
+      </span>
+      <div
+        className="skin-switch-group"
+        role="group"
+        aria-labelledby="skin-switch-label"
+      >
+        {SKIN_IDS.map((id) => (
+          <button
+            key={id}
+            type="button"
+            className={`skin-opt skin-${id}${value === id ? " on" : ""}`}
+            aria-pressed={value === id}
+            // Sin foco al pulsar con el ratón: el teclado sigue en el juego.
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={(e) => {
+              blurTarget(e);
+              onChange(id);
+            }}
+          >
+            <span className="skin-led" aria-hidden="true" />
+            {SKIN_LABELS[id]}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 type SaveState =
   { status: "idle" | "saving" | "saved" } | { status: "error"; error: string };
 export default function GamePlayer({ game }: { game: Game }) {
@@ -20,6 +105,13 @@ export default function GamePlayer({ game }: { game: Game }) {
   const entry = GAME_REGISTRY[game.id];
   const isReal = !!entry;
   const hudFields = entry?.hud ?? ["score", "lives", "level"];
+  // En el servidor (y en la hidratación) siempre CLÁSICO; luego, la guardada.
+  const skin = useSyncExternalStore(
+    subscribeSkin,
+    () => readSkin(game.id),
+    () => DEFAULT_SKIN,
+  );
+  const changeSkin = (next: SkinId) => writeSkin(game.id, next);
   const [score, setScore] = useState(0);
   const scoreRef = useRef(0);
   const [lives, setLives] = useState(START_LIVES);
@@ -32,6 +124,12 @@ export default function GamePlayer({ game }: { game: Game }) {
   const statusRef = useRef(status);
   useEffect(() => {
     statusRef.current = status;
+  }, [status]);
+  // Motor del juego real (lo asigna su Canvas); el mando táctil le envía las acciones.
+  const inputRef = useRef<GameInput | null>(null);
+  // Al pausar, terminar o volver a "ready" no queda ninguna acción mantenida.
+  useEffect(() => {
+    if (status !== "playing") inputRef.current?.releaseAll();
   }, [status]);
   const paused = status === "paused";
   const over = status === "over";
@@ -70,7 +168,10 @@ export default function GamePlayer({ game }: { game: Game }) {
         setStatus(togglePause);
       }
     };
-    const autoPause = () => setStatus((s) => (s === "playing" ? "paused" : s));
+    const autoPause = () => {
+      inputRef.current?.releaseAll();
+      setStatus((s) => (s === "playing" ? "paused" : s));
+    };
     const onVisibility = () => {
       if (document.hidden) autoPause();
     };
@@ -155,99 +256,126 @@ export default function GamePlayer({ game }: { game: Game }) {
           )}
         </div>
         <div className="hud-actions">
+          {/* En móvil estrecho solo se ve el icono; el nombre sigue en aria-label. */}
           <button
             className="btn yellow"
+            aria-label={paused ? "Reanudar" : "Pausa"}
             onClick={(e) => {
               blurTarget(e);
               setStatus(togglePause);
             }}
           >
-            {paused ? "REANUDAR" : "PAUSA"}
+            <span className="hud-btn-icon" aria-hidden="true">
+              {paused ? "▶" : "II"}
+            </span>
+            <span className="hud-btn-text">
+              {paused ? "REANUDAR" : "PAUSA"}
+            </span>
           </button>
           <button
             className="btn magenta"
+            aria-label="Fin"
             onClick={(e) => {
               blurTarget(e);
               endGame();
             }}
           >
-            FIN
+            <span className="hud-btn-icon" aria-hidden="true">
+              ■
+            </span>
+            <span className="hud-btn-text">FIN</span>
           </button>
           <button
             className="btn ghost"
+            aria-label="Salir"
             onClick={() => router.push(`/juegos/${game.id}`)}
           >
-            SALIR
+            <span className="hud-btn-icon" aria-hidden="true">
+              ✕
+            </span>
+            <span className="hud-btn-text">SALIR</span>
           </button>
         </div>
       </div>
-      <div className="crt">
-        <div className="crt-screen">
-          {entry ? (
-            <entry.Canvas
-              status={status}
-              onHud={handleHud}
-              onGameOver={handleGameOver}
-            />
-          ) : (
-            <div className="game-arena">
-              <div className="grid-floor"></div>
-              <div className="enemy e1"></div>
-              <div className="enemy e2"></div>
-              <div className="enemy e3"></div>
-              <div className="player-ship"></div>
-            </div>
-          )}
-          {entry && status === "ready" && (
-            <div className="crt-content game-start">
-              <div className="game-start-inner">
-                <div className="game-start-title pixel">{entry.startTitle}</div>
-                <div className="game-start-prompt pixel">{entry.startHint}</div>
-                <button
-                  className="btn"
-                  onClick={(e) => {
-                    blurTarget(e);
-                    setStatus("playing");
-                  }}
-                >
-                  EMPEZAR
-                </button>
+      {entry && <SkinSwitch value={skin} onChange={changeSkin} />}
+      <div className="player-stage">
+        <div className="crt">
+          <div className="crt-screen">
+            {entry ? (
+              <entry.Canvas
+                status={status}
+                skin={skin}
+                onHud={handleHud}
+                onGameOver={handleGameOver}
+                inputRef={inputRef}
+              />
+            ) : (
+              <div className="game-arena">
+                <div className="grid-floor"></div>
+                <div className="enemy e1"></div>
+                <div className="enemy e2"></div>
+                <div className="enemy e3"></div>
+                <div className="player-ship"></div>
               </div>
-            </div>
-          )}
-          {paused && (
-            <div
-              className="crt-content"
-              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
-            >
-              <div>
-                <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
-                  EN PAUSA
-                </div>
-                <div
-                  className="mono"
-                  style={{
-                    fontSize: 11,
-                    color: "var(--ink-dim)",
-                    marginTop: 10,
-                    letterSpacing: "0.16em",
-                  }}
-                >
-                  PULSA REANUDAR PARA CONTINUAR
+            )}
+            {entry && status === "ready" && (
+              <div className="crt-content game-start">
+                <div className="game-start-inner">
+                  <div className="game-start-title pixel">
+                    {entry.startTitle}
+                  </div>
+                  <div className="game-start-prompt pixel">
+                    {entry.startHint}
+                  </div>
+                  <button
+                    className="btn"
+                    onClick={(e) => {
+                      blurTarget(e);
+                      setStatus("playing");
+                    }}
+                  >
+                    EMPEZAR
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+            {paused && (
+              <div
+                className="crt-content"
+                style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+              >
+                <div>
+                  <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
+                    EN PAUSA
+                  </div>
+                  <div
+                    className="mono"
+                    style={{
+                      fontSize: 11,
+                      color: "var(--ink-dim)",
+                      marginTop: 10,
+                      letterSpacing: "0.16em",
+                    }}
+                  >
+                    PULSA REANUDAR PARA CONTINUAR
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="crt-bottom">
+            <span className="led">SEÑAL OK</span>
+            <span>{game.title} · CRT-83 · 60 HZ</span>
+            {entry ? (
+              <span className="crt-controls">{entry.controls}</span>
+            ) : (
+              <span>CARGA · 1MB</span>
+            )}
+          </div>
         </div>
-        <div className="crt-bottom">
-          <span className="led">SEÑAL OK</span>
-          <span>{game.title} · CRT-83 · 60 HZ</span>
-          {entry ? (
-            <span className="crt-controls">{entry.controls}</span>
-          ) : (
-            <span>CARGA · 1MB</span>
-          )}
-        </div>
+        {entry && (
+          <TouchPad layout={entry.touch} status={status} inputRef={inputRef} />
+        )}
       </div>
       {over && (
         <div className="modal-bd">

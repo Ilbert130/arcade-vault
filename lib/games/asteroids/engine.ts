@@ -1,8 +1,8 @@
+import { DEFAULT_SKIN } from "@/lib/games/skins";
+import type { SkinId } from "@/lib/games/skins";
 import {
-  GLOW,
   H,
   MAX_DT,
-  PALETTE,
   POINTS,
   POWERUP_DROP_CHANCE,
   POWERUP_DURATION,
@@ -21,12 +21,16 @@ import {
   dist,
   rand,
 } from "./entities";
+import { SKINS } from "./skins";
 import type {
   AsteroidsCallbacks,
   AsteroidsGame,
+  AsteroidsAction,
   AsteroidsHud,
-  KeyMap,
+  ActionMap,
 } from "./types";
+/** Separación de la rejilla decorativa (skins con `grid`). */
+const GRID_STEP = 40;
 type Phase = "idle" | "playing" | "dead" | "paused" | "gameover";
 /** Teclas que el juego consume; se bloquea su acción por defecto mientras se juega. */
 const GAME_KEYS = new Set([
@@ -36,9 +40,19 @@ const GAME_KEYS = new Set([
   "ArrowDown",
   "Space",
 ]);
+/** Traducción tecla → acción del motor. */
+const KEY_ACTIONS: Record<string, AsteroidsAction> = {
+  ArrowLeft: "rotateLeft",
+  ArrowRight: "rotateRight",
+  ArrowUp: "thrust",
+  Space: "fire",
+};
+const isAction = (a: string): a is AsteroidsAction =>
+  Object.values(KEY_ACTIONS).includes(a as AsteroidsAction);
 export function createAsteroidsGame(
   canvas: HTMLCanvasElement,
   callbacks: AsteroidsCallbacks,
+  skinId: SkinId = DEFAULT_SKIN,
 ): AsteroidsGame {
   const ctxOrNull = canvas.getContext("2d");
   if (!ctxOrNull) throw new Error("Canvas 2D no disponible");
@@ -47,6 +61,7 @@ export function createAsteroidsGame(
   const font =
     getComputedStyle(canvas).getPropertyValue("--mono").trim() || "monospace";
   // ── Estado (privado al closure) ─────────────────────────────────────────────
+  let skin = SKINS[skinId] ?? SKINS[DEFAULT_SKIN];
   let ship = new Ship();
   let bullets: Bullet[] = [];
   let asteroids: Asteroid[] = [];
@@ -60,8 +75,8 @@ export function createAsteroidsGame(
   let deadTimer = 0;
   let powerUpSpawned = false;
   let killsSinceSpawn = 0;
-  let keys: KeyMap = {};
-  let justPressed: KeyMap = {};
+  let keys: ActionMap = {};
+  let justPressed: ActionMap = {};
   let rafId: number | null = null;
   let lastTime: number | null = null;
   let dpr = 0;
@@ -70,19 +85,28 @@ export function createAsteroidsGame(
   let lastHud: AsteroidsHud | null = null;
   // ── Input ───────────────────────────────────────────────────────────────────
   const inProgress = () => phase === "playing" || phase === "dead";
+  function press(action: string) {
+    if (!inProgress() || !isAction(action)) return;
+    if (!keys[action]) justPressed[action] = true;
+    keys[action] = true;
+  }
+  function release(action: string) {
+    if (isAction(action)) keys[action] = false;
+  }
   function onKeyDown(e: KeyboardEvent) {
     if (!inProgress()) return;
     if (GAME_KEYS.has(e.code)) e.preventDefault();
-    if (!keys[e.code]) justPressed[e.code] = true;
-    keys[e.code] = true;
+    const action = KEY_ACTIONS[e.code];
+    if (action) press(action);
   }
   function onKeyUp(e: KeyboardEvent) {
     if (inProgress() && GAME_KEYS.has(e.code)) e.preventDefault();
-    keys[e.code] = false;
+    const action = KEY_ACTIONS[e.code];
+    if (action) release(action);
   }
-  function pressed(code: string) {
-    const val = !!justPressed[code];
-    justPressed[code] = false;
+  function pressed(action: AsteroidsAction) {
+    const val = !!justPressed[action];
+    justPressed[action] = false;
     return val;
   }
   function clearKeys() {
@@ -174,7 +198,7 @@ export function createAsteroidsGame(
       return;
     }
     // Disparar
-    if (pressed("Space")) bullets.push(...ship.tryShoot());
+    if (pressed("fire")) bullets.push(...ship.tryShoot());
     ship.update(dt, keys);
     bullets.forEach((b) => b.update(dt));
     asteroids.forEach((a) => a.update(dt));
@@ -236,11 +260,11 @@ export function createAsteroidsGame(
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(-Math.PI / 2);
-    ctx.strokeStyle = PALETTE.cyan;
-    ctx.shadowColor = PALETTE.cyan;
-    ctx.shadowBlur = GLOW * 0.6;
-    ctx.lineWidth = 1.2;
-    ctx.lineJoin = "round";
+    ctx.strokeStyle = skin.cyan;
+    ctx.shadowColor = skin.cyan;
+    ctx.shadowBlur = skin.glow * 0.6;
+    ctx.lineWidth = skin.lineWidth * 0.8;
+    ctx.lineJoin = skin.lineJoin;
     ctx.beginPath();
     ctx.moveTo(9, 0);
     ctx.lineTo(-6, -5);
@@ -254,9 +278,9 @@ export function createAsteroidsGame(
     ctx.save();
     ctx.font = `15px ${font}`;
     ctx.textBaseline = "alphabetic";
-    ctx.fillStyle = PALETTE.ink;
-    ctx.shadowColor = "rgba(230, 233, 255, 0.55)";
-    ctx.shadowBlur = 6;
+    ctx.fillStyle = skin.ink;
+    ctx.shadowColor = skin.hudShadow;
+    ctx.shadowBlur = skin.hudGlow;
     ctx.textAlign = "left";
     ctx.fillText(`SCORE  ${score}`, 14, 26);
     ctx.textAlign = "center";
@@ -264,23 +288,40 @@ export function createAsteroidsGame(
     for (let i = 0; i < lives; i++) drawLifeIcon(W - 16 - i * 22, 18);
     if (ship.tripleShot > 0) {
       ctx.textAlign = "left";
-      ctx.fillStyle = PALETTE.green;
-      ctx.shadowColor = PALETTE.green;
-      ctx.shadowBlur = GLOW * 0.8;
+      ctx.fillStyle = skin.green;
+      ctx.shadowColor = skin.green;
+      ctx.shadowBlur = skin.glow * 0.8;
       ctx.fillText(`3x  ${ship.tripleShot.toFixed(1)}s`, 14, 46);
     }
+    ctx.restore();
+  }
+  function drawGrid(color: string) {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let x = GRID_STEP; x < W; x += GRID_STEP) {
+      ctx.moveTo(x + 0.5, 0);
+      ctx.lineTo(x + 0.5, H);
+    }
+    for (let y = GRID_STEP; y < H; y += GRID_STEP) {
+      ctx.moveTo(0, y + 0.5);
+      ctx.lineTo(W, y + 0.5);
+    }
+    ctx.stroke();
     ctx.restore();
   }
   function draw() {
     syncResolution();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = PALETTE.bg;
+    ctx.fillStyle = skin.bg;
     ctx.fillRect(0, 0, W, H);
-    particles.forEach((p) => p.draw(ctx));
-    asteroids.forEach((a) => a.draw(ctx));
-    powerUps.forEach((p) => p.draw(ctx, font));
-    bullets.forEach((b) => b.draw(ctx));
-    ship.draw(ctx, phase !== "idle");
+    if (skin.grid) drawGrid(skin.grid);
+    particles.forEach((p) => p.draw(ctx, skin));
+    asteroids.forEach((a) => a.draw(ctx, skin));
+    powerUps.forEach((p) => p.draw(ctx, skin, font));
+    bullets.forEach((b) => b.draw(ctx, skin));
+    ship.draw(ctx, skin, phase !== "idle");
     drawHUD();
   }
   // ── Bucle ───────────────────────────────────────────────────────────────────
@@ -339,6 +380,11 @@ export function createAsteroidsGame(
       emitHud();
       draw();
     },
+    setSkin(id) {
+      skin = SKINS[id] ?? SKINS[DEFAULT_SKIN];
+      // Redibuja ya: en "idle" no hay bucle y en pausa se ve el cambio al instante.
+      draw();
+    },
     destroy() {
       if (rafId !== null) cancelAnimationFrame(rafId);
       rafId = null;
@@ -347,5 +393,8 @@ export function createAsteroidsGame(
       listening = false;
       clearKeys();
     },
+    press,
+    release,
+    releaseAll: clearKeys,
   };
 }

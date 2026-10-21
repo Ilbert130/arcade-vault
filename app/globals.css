@@ -224,6 +224,7 @@ a {
 }
 .av-nav .links a {
   position: relative;
+  white-space: nowrap;
   padding: 10px 14px;
   font-family: var(--pixel);
   font-size: 9px;
@@ -271,22 +272,37 @@ a {
 }
 .av-nav .auth-btn {
   margin-left: 16px;
+  white-space: nowrap;
 }
 .av-nav .hamburger {
   display: none;
 }
-@media (max-width: 840px) {
+/* La barra se vacía de forma gradual para no desbordar nunca la pantalla: primero los
+   créditos, luego los enlaces (al menú ☰) y, en móvil, la sesión (también en el menú). */
+@media (max-width: 1200px) {
+  .av-nav .coin-counter {
+    display: none;
+  }
+}
+@media (max-width: 1060px) {
   .av-nav {
+    gap: 16px;
     padding: 12px 16px;
   }
   .av-nav .links {
     display: none;
   }
-  .av-nav .coin-counter {
-    display: none;
-  }
   .av-nav .hamburger {
     display: inline-flex;
+  }
+}
+@media (max-width: 480px) {
+  .av-nav {
+    padding: 10px 14px;
+  }
+  .av-nav > .auth-btn,
+  .av-nav > .session-box {
+    display: none;
   }
 }
 .av-mobile-panel {
@@ -3003,5 +3019,523 @@ a {
   }
   .podium-slot.bronze {
     grid-column: 3;
+  }
+}
+/* ===== selector de skin del reproductor (CLÁSICO · NEÓN · RETRO) ===== */
+/* Cada botón es una muestra de su propia skin: el control enseña lo que elige. */
+.skin-switch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: -6px 0 14px;
+  flex-wrap: wrap;
+}
+.skin-switch-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+}
+.skin-switch-group {
+  display: flex;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+.skin-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  font-family: var(--pixel);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  color: var(--ink-faint);
+  background: transparent;
+  border: 0;
+  border-left: 1px solid var(--line-2);
+  cursor: pointer;
+  transition:
+    color 160ms,
+    background-color 160ms,
+    box-shadow 160ms,
+    text-shadow 160ms;
+}
+.skin-opt:first-child {
+  border-left: 0;
+}
+.skin-opt:focus-visible {
+  outline: 1px solid var(--yellow);
+  outline-offset: -3px;
+}
+.skin-led {
+  width: 6px;
+  height: 6px;
+  background: currentColor;
+  opacity: 0.35;
+}
+.skin-opt.on .skin-led {
+  opacity: 1;
+}
+/* CLÁSICO: cian con glow moderado, como el reproductor. */
+.skin-clasico:hover,
+.skin-clasico.on {
+  color: var(--cyan);
+}
+.skin-clasico.on {
+  background: rgba(0, 245, 255, 0.08);
+  text-shadow: 0 0 6px rgba(0, 245, 255, 0.6);
+  box-shadow: inset 0 -2px 0 var(--cyan);
+}
+.skin-clasico.on .skin-led {
+  box-shadow: 0 0 6px var(--cyan);
+}
+/* NEÓN: fondo violeta y doble halo (núcleo blanco + color). */
+.skin-neon:hover,
+.skin-neon.on {
+  color: #ffd6ec;
+}
+.skin-neon.on {
+  background: #07021a;
+  text-shadow:
+    0 0 2px #ffffff,
+    0 0 8px var(--magenta),
+    0 0 16px var(--magenta);
+  box-shadow:
+    inset 0 -2px 0 var(--magenta),
+    inset 0 0 14px rgba(178, 102, 255, 0.35);
+}
+.skin-neon.on .skin-led {
+  background: #ffffff;
+  box-shadow:
+    0 0 4px var(--magenta),
+    0 0 10px var(--magenta);
+}
+/* RETRO: fósforo plano, sin glow ni transiciones suaves. */
+.skin-retro {
+  border-radius: 0;
+}
+.skin-retro:hover,
+.skin-retro.on {
+  color: #39ff14;
+  transition: none;
+}
+.skin-retro.on {
+  background: #0b1a0b;
+  box-shadow: inset 0 0 0 2px #1f5e1f;
+}
+@media (max-width: 720px) {
+  .skin-switch {
+    justify-content: space-between;
+    margin-top: -8px;
+  }
+  .skin-opt {
+    padding: 9px 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skin-opt {
+    transition: none;
+  }
+}
+/* ===== mando táctil (spec 12) ===== */
+/* Panel de mandos del mueble arcade: cruceta de teclas cyan y botones A/B de microrruptor
+   en diagonal. Solo existe en pantallas táctiles (pointer: coarse); con ratón no se pinta.
+   Todo se mide desde --key (lado de una tecla): cada layout solo decide ese valor. */
+.touch-pad {
+  display: none;
+  --key: 62px;
+  --ab: calc(var(--key) * 1.13);
+}
+.touch-pad,
+.touch-btn {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.touch-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, var(--key));
+  /* Filas auto: una fila sin teclas (p. ej. CAÍDA sin ▲) se pliega. */
+  grid-template-rows: repeat(3, auto);
+  grid-template-areas:
+    ". up ."
+    "left . right"
+    ". down .";
+  gap: calc(var(--key) * 0.07);
+}
+.touch-dpad .touch-btn {
+  width: var(--key);
+  height: var(--key);
+}
+.touch-btn--up {
+  grid-area: up;
+}
+.touch-btn--down {
+  grid-area: down;
+}
+.touch-btn--left {
+  grid-area: left;
+}
+.touch-btn--right {
+  grid-area: right;
+}
+.touch-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--key) * 0.08);
+  padding: 0;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, #14141f, #0b0b12);
+  color: var(--cyan);
+  cursor: pointer;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 3px 0 #050507;
+  transition:
+    transform 60ms ease,
+    box-shadow 60ms ease,
+    background 60ms ease;
+}
+.touch-btn-glyph {
+  font-family: var(--pixel);
+  font-size: calc(var(--key) * 0.25);
+  line-height: 1;
+  text-shadow: 0 0 6px currentColor;
+}
+.touch-btn-label {
+  font-size: clamp(5px, calc(var(--key) * 0.1), 8px);
+  letter-spacing: 0.04em;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+/* Microrruptor hundido: baja, pierde la sombra de base y se enciende. */
+.touch-btn[data-pressed] {
+  transform: translateY(3px);
+  background: rgba(0, 245, 255, 0.16);
+  box-shadow:
+    inset 0 0 12px rgba(0, 245, 255, 0.35),
+    0 0 16px rgba(0, 245, 255, 0.45);
+}
+.touch-btn[data-pressed] .touch-btn-label {
+  color: var(--ink);
+}
+/* A y B: botones redondos de arcade en diagonal (A arriba a la derecha, B abajo a la
+   izquierda), apilados para ocupar poco ancho y dejarlo a la cruceta. */
+.touch-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: calc(var(--ab) * 0.3);
+  padding-bottom: calc(var(--ab) * 0.2 + 4px);
+}
+.touch-btn--a,
+.touch-btn--b {
+  width: var(--ab);
+  height: var(--ab);
+  border-radius: 50%;
+  border-width: 2px;
+}
+.touch-btn--a {
+  color: var(--magenta);
+  border-color: var(--magenta);
+}
+.touch-btn--a {
+  order: -1;
+}
+.touch-btn--b {
+  margin-right: calc(var(--ab) * 0.32);
+  color: var(--yellow);
+  border-color: var(--yellow);
+}
+.touch-btn--a .touch-btn-label,
+.touch-btn--b .touch-btn-label {
+  position: absolute;
+  top: calc(100% + 6px);
+  font-size: clamp(6px, calc(var(--ab) * 0.1), 9px);
+}
+.touch-btn--a .touch-btn-glyph,
+.touch-btn--b .touch-btn-glyph {
+  font-size: calc(var(--ab) * 0.26);
+}
+.touch-btn--a[data-pressed] {
+  background: rgba(255, 0, 110, 0.2);
+  box-shadow:
+    inset 0 0 14px rgba(255, 0, 110, 0.45),
+    0 0 18px rgba(255, 0, 110, 0.55);
+}
+.touch-btn--b[data-pressed] {
+  background: rgba(245, 255, 0, 0.14);
+  box-shadow:
+    inset 0 0 14px rgba(245, 255, 0, 0.35),
+    0 0 18px rgba(245, 255, 0, 0.45);
+}
+/* Botones del HUD: en pantallas estrechas quedan en su icono (el texto sigue en aria-label). */
+.hud-btn-icon {
+  display: none;
+}
+@media (pointer: coarse) {
+  /* Las pistas de teclado no aplican en táctil. */
+  .crt-controls {
+    display: none;
+  }
+  /* Tabletas: el panel de mandos va bajo el CRT, como la consola del mueble. */
+  .touch-pad {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 14px;
+    padding: 16px 18px 18px;
+    border-radius: 0 0 28px 28px;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        transparent 0 6px,
+        rgba(0, 245, 255, 0.025) 6px 7px
+      ),
+      #050507;
+    box-shadow:
+      0 0 0 6px #1b1b22,
+      0 0 0 7px #2a2a35;
+  }
+  /* Solo cruceta (SERPENTINA): centrada bajo la pantalla. */
+  .touch-dpad:only-child {
+    margin: 0 auto;
+  }
+}
+/* ── Móvil (táctil con ≤ 720 px de ancho o ≤ 560 px de alto): la pantalla de juego
+   ocupa exactamente el alto visible, sin pie de página ni scroll. ── */
+@media (pointer: coarse) and (max-width: 720px),
+  (pointer: coarse) and (max-height: 560px) {
+  #root:has(.av-player) {
+    height: 100dvh;
+  }
+  #root:has(.av-player) > footer {
+    display: none;
+  }
+  .av-main:has(.av-player) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .av-player {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+  /* HUD en una sola fila; tipografía que escala con el ancho. */
+  .player-hud {
+    flex-wrap: nowrap;
+    gap: clamp(6px, 2vw, 14px);
+    padding: clamp(5px, 1.4vw, 8px) clamp(8px, 2.4vw, 12px);
+    margin-bottom: clamp(5px, 1.4vw, 8px);
+  }
+  .player-hud > div:first-child {
+    flex-wrap: nowrap !important;
+    gap: clamp(8px, 3vw, 18px) !important;
+    min-width: 0;
+  }
+  .hud-stat {
+    gap: 2px;
+    min-width: 0;
+  }
+  .hud-stat .l {
+    font-size: clamp(6px, 1.9vw, 8px);
+    letter-spacing: 0.1em;
+  }
+  .hud-stat .v {
+    font-size: clamp(9px, 3vw, 13px);
+    white-space: nowrap;
+  }
+  .hud-actions {
+    flex: none;
+    gap: clamp(4px, 1.4vw, 8px);
+  }
+  .hud-actions .btn {
+    padding: clamp(6px, 1.8vw, 9px) clamp(7px, 2.2vw, 11px);
+    font-size: clamp(7px, 2vw, 9px);
+    letter-spacing: 0.1em;
+  }
+  /* Selector de aspecto: una sola fila sin etiqueta, repartida a todo el ancho. */
+  .skin-switch {
+    margin: 0 0 clamp(5px, 1.4vw, 8px);
+  }
+  .skin-switch-label {
+    display: none;
+  }
+  .skin-switch-group {
+    flex: 1;
+  }
+  .skin-opt {
+    flex: 1;
+    justify-content: center;
+    gap: 5px;
+    padding: clamp(5px, 1.6vw, 8px) 4px;
+    font-size: clamp(7px, 2vw, 9px);
+    letter-spacing: 0.08em;
+  }
+  .crt-bottom {
+    display: none;
+  }
+}
+/* Vertical: CRT a todo el ancho y el mando llena el resto del alto; sus teclas crecen
+   con ese espacio (container queries) en vez de saltar entre tamaños fijos. */
+@media (pointer: coarse) and (max-width: 720px) and (orientation: portrait) {
+  .av-player {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(6px, 2vw, 10px) clamp(6px, 2.5vw, 12px)
+      clamp(8px, 2.5vw, 12px);
+  }
+  .player-stage {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    container-type: size;
+    --pad-min: 150px;
+  }
+  /* Ancho completo salvo en móviles bajos: ahí el CRT cede para que el mando quepa. */
+  .crt {
+    flex: none;
+    align-self: center;
+    width: min(100cqw, calc((100cqh - var(--pad-min) - 12px) * 4 / 3 + 12px));
+    padding: 6px;
+    border-radius: 14px 14px 0 0;
+  }
+  .touch-pad {
+    flex: 1;
+    min-height: 0;
+    container-type: size;
+    gap: 8px;
+    margin-top: 6px;
+    padding: clamp(8px, 3vw, 16px) clamp(8px, 3vw, 22px);
+    border-radius: 0 0 22px 22px;
+    /* Tecla = lo menor entre lo que cabe en alto (cruceta de 3 teclas) y en ancho
+       (cruceta + columna A/B ≈ 4,75 teclas), entre 40 px (mínimo cómodo) y 96 px. */
+    --key: clamp(40px, min(100cqh / 3.3, (100cqw - 16px) / 4.75), 96px);
+  }
+  /* Sin A/B (SERPENTINA, BLOQUE BUSTER) la cruceta se queda con todo el ancho. */
+  .touch-pad:not(:has(.touch-actions)) {
+    --key: clamp(40px, min(100cqh / 3.3, (100cqw - 16px) / 3.3), 96px);
+  }
+  /* El título de inicio se mide por el ancho del escenario: SERPENTINA cabe en el CRT. */
+  .game-start-title {
+    font-size: clamp(18px, calc((100cqw - 40px) / 11.5), 56px);
+  }
+}
+/* Horizontal: cruceta a la izquierda, CRT al centro a todo el alto, A/B a la derecha. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 560px) {
+  .av-nav {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  .av-player {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: 14px;
+    padding: 6px 12px 8px;
+  }
+  /* En horizontal manda el alto: HUD y botones más bajos para dárselo al CRT. */
+  .player-hud {
+    grid-column: 1 / -1;
+    padding: 3px 10px;
+  }
+  .hud-actions .btn {
+    padding: 5px 8px;
+  }
+  .hud-stat {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+  /* El selector de aspecto sube a la columna de la cruceta, encima de ella, apilado
+     para no ensanchar la columna. */
+  .skin-switch {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .skin-switch-group {
+    flex-direction: column;
+  }
+  .skin-opt {
+    justify-content: flex-start;
+    padding: 5px 8px;
+    border-left: 0;
+    border-top: 1px solid var(--line-2);
+  }
+  .skin-opt:first-child {
+    border-top: 0;
+  }
+  /* Escenario y panel se abren: CRT, cruceta y A/B son celdas de la rejilla del reproductor. */
+  .player-stage,
+  .touch-pad {
+    display: contents;
+  }
+  /* Tecla = lo menor entre el 15 % del alto y lo que deja libre el CRT a cada lado
+     (≈ 3,2 teclas por columna); 104 px ≈ barra + HUD + márgenes. */
+  .touch-pad {
+    --key: clamp(
+      40px,
+      min(15dvh, (100vw - 52px - (100dvh - 104px) * 4 / 3) / 6.4 - 3px),
+      68px
+    );
+  }
+  /* El CRT llena el alto, salvo en móviles cortos de ancho: ahí cede lo justo para que
+     cruceta y A/B no bajen de 40 px. */
+  .crt {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    align-self: center;
+    height: min(100%, calc((100vw - 324px) * 0.75));
+    aspect-ratio: 4 / 3;
+    padding: 6px 8px;
+    border-radius: 16px;
+  }
+  /* El título de la pantalla de inicio se mide por el alto del CRT, no por el ancho de la ventana. */
+  .game-start-title {
+    font-size: clamp(18px, 9dvh, 48px);
+  }
+  .touch-dpad {
+    grid-column: 1;
+    grid-row: 3;
+    place-self: center;
+  }
+  .touch-actions {
+    grid-column: 3;
+    grid-row: 2 / 4;
+    place-self: center;
+  }
+}
+/* Estrecho (≤ 480 px de ancho, o de alto en horizontal): se oculta JUGADOR (sale en el
+   modal final) y los botones del HUD quedan en su icono. */
+@media (pointer: coarse) and (max-width: 480px),
+  (pointer: coarse) and (max-height: 480px) {
+  .player-hud > div:first-child > .hud-stat:first-child {
+    display: none;
+  }
+  .hud-btn-icon {
+    display: inline;
+  }
+  .hud-btn-text {
+    display: none;
+  }
+  .hud-actions .btn {
+    min-width: 34px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .touch-btn {
+    transition: none;
   }
 }

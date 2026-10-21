@@ -15,22 +15,29 @@ import {
   PADDLE_SPRITE,
   PADDLE_W,
   PADDLE_Y,
-  PALETTE,
   SOUND_VOLUME,
   SPRITESHEET_SRC,
   START_LIVES,
   W,
 } from "./constants";
+import { DEFAULT_SKIN, type SkinId } from "../skins";
 import {
+  buildNeonBlock,
   collideAABB,
   createBlocks,
+  drawBackground,
+  drawBall,
   drawBlock,
   drawExplosion,
-  drawSprite,
+  drawPaddle,
+  type DrawSources,
 } from "./entities";
+import { SKINS } from "./skins";
 import type {
   Ball,
   Block,
+  BlockColor,
+  BloqueBusterAction,
   BloqueBusterCallbacks,
   BloqueBusterGame,
   BloqueBusterHud,
@@ -39,9 +46,17 @@ import type {
 } from "./types";
 type Phase = "idle" | "playing" | "paused" | "gameover";
 const GAME_KEYS = new Set(["ArrowLeft", "ArrowRight", "Space"]);
+/** Traducción tecla → acción del motor. */
+const KEY_ACTIONS: Record<string, BloqueBusterAction> = {
+  ArrowLeft: "left",
+  ArrowRight: "right",
+};
+const isAction = (a: string): a is BloqueBusterAction =>
+  a === "left" || a === "right";
 export function createBloqueBusterGame(
   canvas: HTMLCanvasElement,
   callbacks: BloqueBusterCallbacks,
+  initialSkin: SkinId = DEFAULT_SKIN,
 ): BloqueBusterGame {
   const ctxOrNull = canvas.getContext("2d");
   if (!ctxOrNull) throw new Error("Canvas 2D no disponible");
@@ -63,11 +78,23 @@ export function createBloqueBusterGame(
   let gameOverEmitted = false;
   let lastHud: BloqueBusterHud | null = null;
   const keys = { left: false, right: false };
+  let skinId: SkinId = initialSkin;
   // ── Assets (por instancia, nada a nivel de módulo) ──────────────────────────
   const sheet = new Image();
   let sheetReady = false;
   let bounceSound: HTMLAudioElement | null = null;
   let breakSound: HTMLAudioElement | null = null;
+  // Bloques neón prerenderizados por skin+color; se invalidan si cambia el dpr.
+  const blockCache = new Map<string, CanvasImageSource | null>();
+  const sources: DrawSources = {
+    sheet,
+    neonBlock(color: BlockColor) {
+      const key = `${skinId}:${color}`;
+      if (!blockCache.has(key))
+        blockCache.set(key, buildNeonBlock(color, SKINS[skinId], dpr));
+      return blockCache.get(key) ?? null;
+    },
+  };
   function play(sound: HTMLAudioElement | null) {
     if (!sound) return;
     const clone = sound.cloneNode() as HTMLAudioElement;
@@ -104,8 +131,7 @@ export function createBloqueBusterGame(
     score = 0;
     lives = START_LIVES;
     paddle.x = (W - paddle.w) / 2;
-    keys.left = false;
-    keys.right = false;
+    releaseAll();
     gameOverEmitted = false;
     loadLevel(1);
   }
@@ -179,16 +205,27 @@ export function createBloqueBusterGame(
     }
   }
   // ── Input ───────────────────────────────────────────────────────────────────
+  function press(action: string) {
+    if (phase !== "playing" || !isAction(action)) return;
+    keys[action] = true;
+  }
+  function release(action: string) {
+    if (isAction(action)) keys[action] = false;
+  }
+  function releaseAll() {
+    keys.left = false;
+    keys.right = false;
+  }
   function onKeyDown(e: KeyboardEvent) {
     if (phase !== "playing") return;
     if (GAME_KEYS.has(e.code)) e.preventDefault();
-    if (e.code === "ArrowLeft") keys.left = true;
-    if (e.code === "ArrowRight") keys.right = true;
+    const action = KEY_ACTIONS[e.code];
+    if (action) press(action);
   }
   function onKeyUp(e: KeyboardEvent) {
     if (GAME_KEYS.has(e.code) && phase === "playing") e.preventDefault();
-    if (e.code === "ArrowLeft") keys.left = false;
-    if (e.code === "ArrowRight") keys.right = false;
+    const action = KEY_ACTIONS[e.code];
+    if (action) release(action);
   }
   function onMouseMove(e: MouseEvent) {
     if (phase !== "playing") return;
@@ -202,19 +239,23 @@ export function createBloqueBusterGame(
     const nextDpr = window.devicePixelRatio || 1;
     if (nextDpr === dpr) return;
     dpr = nextDpr;
+    blockCache.clear();
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
   }
   function draw() {
     syncResolution();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = PALETTE.bg;
-    ctx.fillRect(0, 0, W, H);
-    if (!sheetReady) return;
-    for (const block of blocks) if (block.alive) drawBlock(ctx, sheet, block);
-    for (const e of explosions) drawExplosion(ctx, sheet, e);
-    drawSprite(ctx, sheet, PADDLE_SPRITE, paddle);
-    drawSprite(ctx, sheet, BALL_SPRITE, ball);
+    const skin = SKINS[skinId];
+    drawBackground(ctx, skin);
+    // La partida no arranca hasta que carga el spritesheet en ninguna skin
+    // (update lo exige); las vectoriales solo pueden mostrar antes el tablero.
+    if (skin.sprites && !sheetReady) return;
+    for (const block of blocks)
+      if (block.alive) drawBlock(ctx, sources, block, skin);
+    for (const e of explosions) drawExplosion(ctx, sources, e, skin);
+    drawPaddle(ctx, sources, PADDLE_SPRITE, paddle, skin);
+    drawBall(ctx, sources, BALL_SPRITE, ball, skin);
   }
   // ── Bucle ───────────────────────────────────────────────────────────────────
   function loop(ts: number) {
@@ -267,8 +308,7 @@ export function createBloqueBusterGame(
     pause() {
       if (phase !== "playing") return;
       phase = "paused";
-      keys.left = false;
-      keys.right = false;
+      releaseAll();
     },
     resume() {
       if (phase !== "paused") return;
@@ -281,8 +321,15 @@ export function createBloqueBusterGame(
       emitHud();
       draw();
     },
+    setSkin(id) {
+      if (id === skinId) return;
+      skinId = id;
+      // Sin bucle activo (ready / over) se redibuja ya; con bucle, en el siguiente frame.
+      if (!destroyed && rafId === null) draw();
+    },
     destroy() {
       destroyed = true;
+      blockCache.clear();
       sheet.onload = null;
       if (rafId !== null) cancelAnimationFrame(rafId);
       rafId = null;
@@ -291,5 +338,8 @@ export function createBloqueBusterGame(
       canvas.removeEventListener("mousemove", onMouseMove);
       listening = false;
     },
+    press,
+    release,
+    releaseAll,
   };
 }
