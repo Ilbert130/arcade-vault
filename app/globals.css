@@ -3138,14 +3138,73 @@ a {
     transition: none;
   }
 }
-/* ===== mando táctil (spec 12) ===== */
-/* Panel de mandos del mueble arcade: cruceta de teclas cyan y botones A/B de microrruptor
-   en diagonal. Solo existe en pantallas táctiles (pointer: coarse); con ratón no se pinta.
-   Todo se mide desde --key (lado de una tecla): cada layout solo decide ese valor. */
+/* ===== mando táctil: Gamepad MK-II (specs 12 y 13) ===== */
+/* Mando de consola (references/gamepad-assets): carcasa con filete y textura de puntos,
+   cruceta de 4 teclas con hub y A/B redondos lado a lado. Solo existe en pantallas
+   táctiles (pointer: coarse); con ratón no se pinta. Todo se mide desde --key (lado de
+   una tecla de la cruceta): cada layout solo decide ese valor. La paleta son las
+   variables --pad-* (clasico por defecto; data-skin las cambia). --pad-glow multiplica
+   todos los desenfoques: con 0 no queda glow. */
 .touch-pad {
   display: none;
   --key: 62px;
-  --ab: calc(var(--key) * 1.13);
+  --ab: calc(var(--key) * 1.35);
+  --pad-radius: 22px;
+  --pad-shell-top: #1c1c28;
+  --pad-shell-bottom: #0c0c14;
+  --pad-line: var(--line);
+  --pad-fillet: rgba(0, 245, 255, 0.14);
+  --pad-dots: rgba(255, 255, 255, 0.03);
+  --pad-halo: rgba(0, 245, 255, 0.4);
+  --pad-ring: rgba(255, 255, 255, 0.02);
+  --pad-key-top: #1a1a25;
+  --pad-key-bottom: #0a0a12;
+  --pad-key-ink: var(--ink-dim);
+  --pad-key-base: #050507;
+  --pad-silk: rgba(138, 143, 181, 0.7);
+  --pad-accent: var(--cyan);
+  --pad-a: var(--magenta);
+  --pad-b: var(--cyan);
+  --pad-glow: 1;
+}
+/* NEÓN: el MK-II subido de vueltas: borde y filete saturados, halo intenso, más glow. */
+.touch-pad[data-skin="neon"] {
+  --pad-line: rgba(0, 245, 255, 0.55);
+  --pad-fillet: rgba(255, 0, 110, 0.35);
+  --pad-halo: rgba(0, 245, 255, 0.75);
+  --pad-ring: rgba(0, 245, 255, 0.12);
+  --pad-key-ink: #b4b9e6;
+  --pad-silk: rgba(0, 245, 255, 0.6);
+  --pad-glow: 1.6;
+}
+/* RETRO: consola tipo NES: carcasa gris/beige con canto oscuro (contrasta con el fondo
+   del reproductor), cruceta negra, A/B rojos, sin glow ni halo y la gema roja quieta. */
+.touch-pad[data-skin="retro"] {
+  --pad-shell-top: #cfcbbe;
+  --pad-shell-bottom: #a9a598;
+  --pad-line: #141414;
+  --pad-fillet: rgba(0, 0, 0, 0.22);
+  --pad-dots: rgba(0, 0, 0, 0.07);
+  --pad-halo: transparent;
+  --pad-ring: #141414;
+  --pad-key-top: #2a2a2a;
+  --pad-key-bottom: #0e0e0e;
+  --pad-key-ink: #d8d4c8;
+  --pad-key-base: #3b3933;
+  --pad-silk: #4a463d;
+  --pad-accent: #d4202e;
+  --pad-a: #c8102e;
+  --pad-b: #c8102e;
+  --pad-glow: 0;
+}
+.touch-pad[data-skin="retro"] .touch-dpad-gem {
+  animation: none;
+}
+/* Serigrafía sobre plástico claro: el relieve se invierte (luz abajo más marcada). */
+.touch-pad[data-skin="retro"] .touch-silk {
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 1px 0 rgba(255, 255, 255, 0.45);
 }
 .touch-pad,
 .touch-btn {
@@ -3155,20 +3214,67 @@ a {
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
 }
+/* Carcasa: gradiente, bisel arriba/abajo y halo; ::before es el filete a 4 px y ::after la
+   textura de puntos de 8 px (detrás de las teclas). La pinta .touch-pad (carcasa única) o,
+   en móvil horizontal, cada .touch-shell (medias carcasas); la otra queda en display:
+   contents y sin pseudoelementos. */
+.touch-pad,
+.touch-shell {
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(
+    180deg,
+    var(--pad-shell-top),
+    var(--pad-shell-bottom)
+  );
+  border: 1px solid var(--pad-line);
+  border-radius: var(--pad-radius);
+  box-shadow:
+    0 30px 80px -30px var(--pad-halo),
+    0 0 0 1px var(--pad-ring),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.6);
+}
+.touch-pad::before,
+.touch-pad::after,
+.touch-shell::before,
+.touch-shell::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+}
+.touch-pad::before,
+.touch-shell::before {
+  inset: 4px;
+  border: 1px solid var(--pad-fillet);
+  border-radius: calc(var(--pad-radius) - 4px);
+}
+.touch-pad::after,
+.touch-shell::after {
+  inset: 0;
+  border-radius: inherit;
+  background-image: radial-gradient(var(--pad-dots) 1px, transparent 1px);
+  background-size: 8px 8px;
+  opacity: 0.6;
+}
+.touch-shell {
+  display: contents;
+}
+.touch-shell::before,
+.touch-shell::after {
+  content: none;
+}
+/* Cruceta: 4 teclas sueltas alrededor del hub, siempre las mismas (silueta fija). */
 .touch-dpad {
   display: grid;
   grid-template-columns: repeat(3, var(--key));
-  /* Filas auto: una fila sin teclas (p. ej. CAÍDA sin ▲) se pliega. */
-  grid-template-rows: repeat(3, auto);
+  grid-template-rows: repeat(3, var(--key));
   grid-template-areas:
     ". up ."
-    "left . right"
+    "left hub right"
     ". down .";
-  gap: calc(var(--key) * 0.07);
-}
-.touch-dpad .touch-btn {
-  width: var(--key);
-  height: var(--key);
+  gap: calc(var(--key) * 0.06);
 }
 .touch-btn--up {
   grid-area: up;
@@ -3185,95 +3291,188 @@ a {
 .touch-btn {
   position: relative;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--key) * 0.08);
   padding: 0;
-  border: 1px solid var(--line);
-  background: linear-gradient(180deg, #14141f, #0b0b12);
-  color: var(--cyan);
   cursor: pointer;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 3px 0 #050507;
   transition:
-    transform 60ms ease,
-    box-shadow 60ms ease,
-    background 60ms ease;
+    transform 80ms,
+    box-shadow 140ms,
+    color 140ms,
+    border-color 140ms,
+    background 140ms;
 }
-.touch-btn-glyph {
-  font-family: var(--pixel);
-  font-size: calc(var(--key) * 0.25);
-  line-height: 1;
-  text-shadow: 0 0 6px currentColor;
-}
-.touch-btn-label {
-  font-size: clamp(5px, calc(var(--key) * 0.1), 8px);
-  letter-spacing: 0.04em;
-  color: var(--ink-dim);
-  white-space: nowrap;
-}
-/* Microrruptor hundido: baja, pierde la sombra de base y se enciende. */
-.touch-btn[data-pressed] {
-  transform: translateY(3px);
-  background: rgba(0, 245, 255, 0.16);
+.touch-dpad .touch-btn {
+  width: var(--key);
+  height: var(--key);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: calc(var(--key) * 0.2);
+  background: linear-gradient(
+    180deg,
+    var(--pad-key-top),
+    var(--pad-key-bottom)
+  );
+  color: var(--pad-key-ink);
   box-shadow:
-    inset 0 0 12px rgba(0, 245, 255, 0.35),
-    0 0 16px rgba(0, 245, 255, 0.45);
+    0 4px 0 var(--pad-key-base),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6);
 }
-.touch-btn[data-pressed] .touch-btn-label {
-  color: var(--ink);
+.touch-btn-arrow {
+  width: calc(var(--key) * 0.44);
+  height: calc(var(--key) * 0.44);
+  transition: filter 140ms;
 }
-/* A y B: botones redondos de arcade en diagonal (A arriba a la derecha, B abajo a la
-   izquierda), apilados para ocupar poco ancho y dejarlo a la cruceta. */
+/* Tecla hundida: baja, pierde la sombra de base y se enciende con el acento. */
+.touch-dpad .touch-btn[data-pressed] {
+  transform: translateY(3px);
+  color: var(--pad-accent);
+  border-color: var(--pad-accent);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--pad-accent) 10%, var(--pad-key-bottom)),
+    var(--pad-key-bottom)
+  );
+  box-shadow:
+    0 1px 0 var(--pad-key-base),
+    inset 0 0 calc(16px * var(--pad-glow))
+      color-mix(in srgb, var(--pad-accent) 45%, transparent),
+    0 0 calc(16px * var(--pad-glow))
+      color-mix(in srgb, var(--pad-accent) 50%, transparent);
+}
+.touch-btn[data-pressed] .touch-btn-arrow {
+  filter: drop-shadow(0 0 calc(6px * var(--pad-glow)) var(--pad-accent));
+}
+/* Hub: pieza fija del centro con una gema en rombo que late. */
+.touch-dpad-hub {
+  grid-area: hub;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pad-fillet);
+  border-radius: calc(var(--key) * 0.12);
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--pad-key-top) 0%,
+    var(--pad-key-bottom) 80%
+  );
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+.touch-dpad-gem {
+  width: calc(var(--key) * 0.24);
+  height: calc(var(--key) * 0.24);
+  background: var(--pad-accent);
+  box-shadow:
+    0 0 calc(10px * var(--pad-glow)) var(--pad-accent),
+    inset 0 0 4px rgba(0, 0, 0, 0.5);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+  animation: pulse-led 2s ease-in-out infinite;
+}
+/* A/B: redondos lado a lado (B, A), con la serigrafía grabada debajo de cada uno. */
 .touch-actions {
   display: flex;
+  align-items: flex-start;
+  gap: calc(var(--key) * 0.4);
+}
+/* La separación deja sitio al anillo de pulsado (≈ 0,16 × --ab fuera del botón, más los
+   4 px que baja) para que no cruce la serigrafía. */
+.touch-ab {
+  display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: calc(var(--ab) * 0.3);
-  padding-bottom: calc(var(--ab) * 0.2 + 4px);
+  align-items: center;
+  gap: calc(var(--ab) * 0.17 + 6px);
 }
 .touch-btn--a,
 .touch-btn--b {
+  --ab-color: var(--pad-a);
   width: var(--ab);
   height: var(--ab);
+  border: 2px solid var(--ab-color);
   border-radius: 50%;
-  border-width: 2px;
-}
-.touch-btn--a {
-  color: var(--magenta);
-  border-color: var(--magenta);
-}
-.touch-btn--a {
-  order: -1;
+  color: var(--ab-color);
+  background:
+    radial-gradient(
+      circle at 32% 26%,
+      rgba(255, 255, 255, 0.25),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 50% 55%,
+      color-mix(in srgb, var(--ab-color) 70%, transparent),
+      color-mix(in srgb, var(--ab-color) 38%, #000) 75%
+    );
+  box-shadow:
+    0 6px 0 var(--pad-key-base),
+    0 0 calc(22px * var(--pad-glow))
+      color-mix(in srgb, var(--ab-color) 40%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.4);
 }
 .touch-btn--b {
-  margin-right: calc(var(--ab) * 0.32);
-  color: var(--yellow);
-  border-color: var(--yellow);
+  --ab-color: var(--pad-b);
 }
-.touch-btn--a .touch-btn-label,
-.touch-btn--b .touch-btn-label {
+.touch-btn-letter {
+  position: relative;
+  z-index: 2;
+  font-size: calc(var(--ab) * 0.3);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #fff;
+  text-shadow:
+    0 0 calc(8px * var(--pad-glow)) var(--ab-color),
+    0 0 calc(18px * var(--pad-glow)) var(--ab-color),
+    0 1px 0 rgba(0, 0, 0, 0.6);
+}
+/* Anillo discontinuo: solo aparece mientras se pulsa. */
+.touch-btn-ring {
   position: absolute;
-  top: calc(100% + 6px);
-  font-size: clamp(6px, calc(var(--ab) * 0.1), 9px);
+  inset: calc(var(--ab) * -0.11);
+  border: 1px dashed currentColor;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 140ms,
+    transform 200ms;
 }
-.touch-btn--a .touch-btn-glyph,
-.touch-btn--b .touch-btn-glyph {
-  font-size: calc(var(--ab) * 0.26);
-}
-.touch-btn--a[data-pressed] {
-  background: rgba(255, 0, 110, 0.2);
-  box-shadow:
-    inset 0 0 14px rgba(255, 0, 110, 0.45),
-    0 0 18px rgba(255, 0, 110, 0.55);
-}
+.touch-btn--a[data-pressed],
 .touch-btn--b[data-pressed] {
-  background: rgba(245, 255, 0, 0.14);
+  transform: translateY(4px) scale(0.97);
   box-shadow:
-    inset 0 0 14px rgba(245, 255, 0, 0.35),
-    0 0 18px rgba(245, 255, 0, 0.45);
+    0 1px 0 var(--pad-key-base),
+    0 0 calc(36px * var(--pad-glow))
+      color-mix(in srgb, var(--ab-color) 40%, transparent),
+    inset 0 0 18px rgba(0, 0, 0, 0.5);
+}
+.touch-btn[data-pressed] .touch-btn-ring {
+  opacity: 1;
+  transform: scale(1.08);
+}
+/* Serigrafía: texto pequeño hundido en el plástico (sombra arriba, luz abajo). Vacía en
+   los botones inertes, pero conserva su alto para que la silueta no cambie. */
+.touch-silk {
+  min-height: 1em;
+  font-size: clamp(6px, calc(var(--key) * 0.12), 9px);
+  line-height: 1;
+  letter-spacing: 0.12em;
+  color: var(--pad-silk);
+  text-shadow:
+    0 -1px 0 rgba(0, 0, 0, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+}
+/* Slot sin acción en este juego: apagado, sin glow ni respuesta (no tiene handlers). */
+.touch-btn[data-inert] {
+  --pad-glow: 0;
+  cursor: default;
+  opacity: 0.32;
+  transition: none;
+}
+.touch-btn--a[data-inert],
+.touch-btn--b[data-inert] {
+  --ab-color: var(--pad-key-ink);
 }
 /* Botones del HUD: en pantallas estrechas quedan en su icono (el texto sigue en aria-label). */
 .hud-btn-icon {
@@ -3284,29 +3483,14 @@ a {
   .crt-controls {
     display: none;
   }
-  /* Tabletas: el panel de mandos va bajo el CRT, como la consola del mueble. */
+  /* Tabletas: carcasa única bajo el CRT, cruceta a la izquierda y A/B a la derecha. */
   .touch-pad {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
     margin-top: 14px;
-    padding: 16px 18px 18px;
-    border-radius: 0 0 28px 28px;
-    background:
-      repeating-linear-gradient(
-        90deg,
-        transparent 0 6px,
-        rgba(0, 245, 255, 0.025) 6px 7px
-      ),
-      #050507;
-    box-shadow:
-      0 0 0 6px #1b1b22,
-      0 0 0 7px #2a2a35;
-  }
-  /* Solo cruceta (SERPENTINA): centrada bajo la pantalla. */
-  .touch-dpad:only-child {
-    margin: 0 auto;
+    padding: calc(var(--key) * 0.25) calc(var(--key) * 0.3);
   }
 }
 /* ── Móvil (táctil con ≤ 720 px de ancho o ≤ 560 px de alto): la pantalla de juego
@@ -3401,38 +3585,46 @@ a {
     display: flex;
     flex-direction: column;
     container-type: size;
-    --pad-min: 150px;
+    /* Tecla = lo menor entre lo que cabe en ancho (cruceta + B/A lado a lado ≈ 6,5
+       teclas; 34 px = padding, borde y hueco) y en el alto que deja el CRT a todo el
+       ancho (cruceta = 3,12 teclas; 36 px = padding del CRT, padding/borde/margen del
+       mando), entre 40 px (mínimo cómodo) y 96 px. Si no llega a 40 px, cede el CRT. */
+    --key-fit: clamp(
+      40px,
+      min(
+        (100cqw - 34px) / 6.5,
+        (100cqh - (100cqw - 12px) * 0.75 - 36px) / 3.12
+      ),
+      96px
+    );
+    /* Alto del mando: cruceta + padding y borde + su margen superior. */
+    --pad-h: calc(var(--key-fit) * 3.12 + 24px);
   }
   /* Ancho completo salvo en móviles bajos: ahí el CRT cede para que el mando quepa. */
   .crt {
     flex: none;
     align-self: center;
-    width: min(100cqw, calc((100cqh - var(--pad-min) - 12px) * 4 / 3 + 12px));
+    width: min(100cqw, calc((100cqh - var(--pad-h) - 12px) * 4 / 3 + 12px));
     padding: 6px;
-    border-radius: 14px 14px 0 0;
+    border-radius: 14px;
   }
+  /* Carcasa única a todo el ancho bajo el CRT, ajustada a las teclas (padding mínimo). */
   .touch-pad {
-    flex: 1;
-    min-height: 0;
-    container-type: size;
+    flex: none;
     gap: 8px;
     margin-top: 6px;
-    padding: clamp(8px, 3vw, 16px) clamp(8px, 3vw, 22px);
-    border-radius: 0 0 22px 22px;
-    /* Tecla = lo menor entre lo que cabe en alto (cruceta de 3 teclas) y en ancho
-       (cruceta + columna A/B ≈ 4,75 teclas), entre 40 px (mínimo cómodo) y 96 px. */
-    --key: clamp(40px, min(100cqh / 3.3, (100cqw - 16px) / 4.75), 96px);
-  }
-  /* Sin A/B (SERPENTINA, BLOQUE BUSTER) la cruceta se queda con todo el ancho. */
-  .touch-pad:not(:has(.touch-actions)) {
-    --key: clamp(40px, min(100cqh / 3.3, (100cqw - 16px) / 3.3), 96px);
+    padding: 8px 12px;
+    --pad-radius: 16px;
+    /* Se resuelve contra el escenario (container query). */
+    --key: var(--key-fit);
   }
   /* El título de inicio se mide por el ancho del escenario: SERPENTINA cabe en el CRT. */
   .game-start-title {
     font-size: clamp(18px, calc((100cqw - 40px) / 11.5), 56px);
   }
 }
-/* Horizontal: cruceta a la izquierda, CRT al centro a todo el alto, A/B a la derecha. */
+/* Horizontal: dos medias carcasas (grips), la cruceta a la izquierda y A/B a la derecha,
+   con el CRT al centro a todo el alto. */
 @media (pointer: coarse) and (orientation: landscape) and (max-height: 560px) {
   .av-nav {
     padding-top: 6px;
@@ -3477,27 +3669,50 @@ a {
   .skin-opt:first-child {
     border-top: 0;
   }
-  /* Escenario y panel se abren: CRT, cruceta y A/B son celdas de la rejilla del reproductor. */
+  /* Escenario y mando se abren: CRT y medias carcasas son celdas de la rejilla del
+     reproductor. El mando deja de pintar su carcasa; la pinta cada media carcasa. */
   .player-stage,
   .touch-pad {
     display: contents;
   }
+  .touch-pad::before,
+  .touch-pad::after {
+    content: none;
+  }
   /* Tecla = lo menor entre el 15 % del alto y lo que deja libre el CRT a cada lado
-     (≈ 3,2 teclas por columna); 104 px ≈ barra + HUD + márgenes. */
+     (≈ 3,4 teclas por media carcasa); 104 px ≈ barra + HUD + márgenes. */
   .touch-pad {
     --key: clamp(
       40px,
-      min(15dvh, (100vw - 52px - (100dvh - 104px) * 4 / 3) / 6.4 - 3px),
+      min(15dvh, (100vw - 52px - (100dvh - 104px) * 4 / 3) / 6.9 - 2px),
       68px
     );
+    --pad-radius: calc(var(--key) * 0.36);
+  }
+  .touch-shell {
+    display: flex;
+    padding: calc(var(--key) * 0.14);
+    place-self: center;
+  }
+  .touch-shell::before,
+  .touch-shell::after {
+    content: "";
+  }
+  .touch-shell--dpad {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .touch-shell--actions {
+    grid-column: 3;
+    grid-row: 2 / 4;
   }
   /* El CRT llena el alto, salvo en móviles cortos de ancho: ahí cede lo justo para que
-     cruceta y A/B no bajen de 40 px. */
+     las medias carcasas no bajen de teclas de 40 px. */
   .crt {
     grid-column: 2;
     grid-row: 2 / 4;
     align-self: center;
-    height: min(100%, calc((100vw - 324px) * 0.75));
+    height: min(100%, calc((100vw - 342px) * 0.75));
     aspect-ratio: 4 / 3;
     padding: 6px 8px;
     border-radius: 16px;
@@ -3505,16 +3720,6 @@ a {
   /* El título de la pantalla de inicio se mide por el alto del CRT, no por el ancho de la ventana. */
   .game-start-title {
     font-size: clamp(18px, 9dvh, 48px);
-  }
-  .touch-dpad {
-    grid-column: 1;
-    grid-row: 3;
-    place-self: center;
-  }
-  .touch-actions {
-    grid-column: 3;
-    grid-row: 2 / 4;
-    place-self: center;
   }
 }
 /* Estrecho (≤ 480 px de ancho, o de alto en horizontal): se oculta JUGADOR (sale en el
@@ -3535,7 +3740,12 @@ a {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .touch-btn {
+  .touch-btn,
+  .touch-btn-arrow,
+  .touch-btn-ring {
     transition: none;
+  }
+  .touch-dpad-gem {
+    animation: none;
   }
 }

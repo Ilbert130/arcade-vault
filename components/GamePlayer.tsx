@@ -374,7 +374,12 @@ export default function GamePlayer({ game }: { game: Game }) {
           </div>
         </div>
         {entry && (
-          <TouchPad layout={entry.touch} status={status} inputRef={inputRef} />
+          <TouchPad
+            layout={entry.touch}
+            status={status}
+            inputRef={inputRef}
+            skin={skin}
+          />
         )}
       </div>
       {over && (

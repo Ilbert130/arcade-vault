@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { PointerEvent, RefObject } from "react";
 import type { GameStatus } from "@/components/games/registry";
+import type { SkinId } from "@/lib/games/skins";
 import type {
   GameInput,
   TouchButton,
@@ -11,15 +12,17 @@ import type {
 // Repetición al mantener (botones con `repeat`): press inmediato, espera y luego cada intervalo.
 export const REPEAT_DELAY_MS = 170;
 export const REPEAT_INTERVAL_MS = 50;
-const DPAD_SLOTS: TouchSlot[] = ["up", "left", "right", "down"];
-const ACTION_SLOTS: TouchSlot[] = ["b", "a"];
-const GLYPHS: Record<TouchSlot, string> = {
-  up: "▲",
-  down: "▼",
-  left: "◀",
-  right: "▶",
-  a: "A",
-  b: "B",
+type DpadSlot = "up" | "down" | "left" | "right";
+type ActionSlot = "a" | "b";
+const DPAD_SLOTS: DpadSlot[] = ["up", "left", "right", "down"];
+// B a la izquierda, A a la derecha (como en el MK-II).
+const ACTION_SLOTS: ActionSlot[] = ["b", "a"];
+// Flechas en SVG (viewBox 24×24): nítidas y centradas en cualquier fuente y dispositivo.
+const ARROWS: Record<DpadSlot, string> = {
+  up: "M12 4 L20 16 L4 16 Z",
+  down: "M4 8 L20 8 L12 20 Z",
+  left: "M16 4 L16 20 L4 12 Z",
+  right: "M8 4 L20 12 L8 20 Z",
 };
 const SLOT_NAMES: Record<TouchSlot, string> = {
   up: "ARRIBA",
@@ -29,35 +32,97 @@ const SLOT_NAMES: Record<TouchSlot, string> = {
   a: "A",
   b: "B",
 };
+const isActionSlot = (slot: TouchSlot): slot is ActionSlot =>
+  slot === "a" || slot === "b";
 type TouchPadProps = {
   layout: TouchLayout;
   status: GameStatus;
   inputRef: RefObject<GameInput | null>;
+  skin: SkinId; // skin activa del reproductor: paleta del mando
 };
-export default function TouchPad({ layout, status, inputRef }: TouchPadProps) {
+// Silueta fija (cruceta completa + B/A): los slots sin entrada en el layout se pintan inertes.
+export default function TouchPad({
+  layout,
+  status,
+  inputRef,
+  skin,
+}: TouchPadProps) {
   const active = status === "playing";
   const bySlot = new Map(layout.map((b) => [b.slot, b]));
-  const renderSlots = (slots: TouchSlot[]) =>
-    slots.flatMap((slot) => {
-      const button = bySlot.get(slot);
-      return button
-        ? [
-            <PadButton
-              key={slot}
-              button={button}
-              active={active}
-              inputRef={inputRef}
-            />,
-          ]
-        : [];
-    });
-  const dpad = renderSlots(DPAD_SLOTS);
-  const actions = renderSlots(ACTION_SLOTS);
+  const renderSlot = (slot: TouchSlot) => {
+    const button = bySlot.get(slot);
+    return button ? (
+      <PadButton
+        key={slot}
+        button={button}
+        active={active}
+        inputRef={inputRef}
+      />
+    ) : (
+      <InertButton key={slot} slot={slot} />
+    );
+  };
   return (
-    <div className="touch-pad" onContextMenu={(e) => e.preventDefault()}>
-      {dpad.length > 0 && <div className="touch-dpad">{dpad}</div>}
-      {actions.length > 0 && <div className="touch-actions">{actions}</div>}
+    <div
+      className="touch-pad"
+      data-skin={skin}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {/* Medias carcasas: en horizontal cada una pinta la suya; si no, la pinta .touch-pad. */}
+      <div className="touch-shell touch-shell--dpad">
+        <div className="touch-dpad">
+          {DPAD_SLOTS.map(renderSlot)}
+          <span className="touch-dpad-hub" aria-hidden="true">
+            <span className="touch-dpad-gem" />
+          </span>
+        </div>
+      </div>
+      <div className="touch-shell touch-shell--actions">
+        <div className="touch-actions">
+          {ACTION_SLOTS.map((slot) => (
+            <div key={slot} className={`touch-ab touch-ab--${slot}`}>
+              {renderSlot(slot)}
+              {/* Serigrafía grabada en la carcasa: solo A/B con acción. */}
+              <span className="touch-silk pixel" aria-hidden="true">
+                {bySlot.get(slot)?.label ?? ""}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
+  );
+}
+// Cara de la tecla: flecha en la cruceta; anillo + letra en A/B.
+function SlotFace({ slot }: { slot: TouchSlot }) {
+  if (isActionSlot(slot))
+    return (
+      <>
+        <span className="touch-btn-ring" aria-hidden="true" />
+        <span className="touch-btn-letter pixel" aria-hidden="true">
+          {SLOT_NAMES[slot]}
+        </span>
+      </>
+    );
+  return (
+    <svg className="touch-btn-arrow" viewBox="0 0 24 24" aria-hidden="true">
+      <path d={ARROWS[slot]} fill="currentColor" />
+    </svg>
+  );
+}
+// Slot sin acción en este juego: mantiene la silueta, sin handlers ni inputRef.
+function InertButton({ slot }: { slot: TouchSlot }) {
+  return (
+    <button
+      type="button"
+      tabIndex={-1}
+      className={`touch-btn touch-btn--${slot}`}
+      aria-label={SLOT_NAMES[slot]}
+      aria-disabled="true"
+      data-inert=""
+    >
+      <SlotFace slot={slot} />
+    </button>
   );
 }
 type PadButtonProps = {
@@ -137,14 +202,7 @@ function PadButton({ button, active, inputRef }: PadButtonProps) {
       onLostPointerCapture={onPointerEnd}
       onPointerMove={onPointerMove}
     >
-      <span className="touch-btn-glyph" aria-hidden="true">
-        {GLYPHS[slot]}
-      </span>
-      {label && (
-        <span className="touch-btn-label pixel" aria-hidden="true">
-          {label}
-        </span>
-      )}
+      <SlotFace slot={slot} />
     </button>
   );
 }
