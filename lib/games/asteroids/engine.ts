@@ -25,8 +25,9 @@ import { SKINS } from "./skins";
 import type {
   AsteroidsCallbacks,
   AsteroidsGame,
+  AsteroidsAction,
   AsteroidsHud,
-  KeyMap,
+  ActionMap,
 } from "./types";
 /** Separación de la rejilla decorativa (skins con `grid`). */
 const GRID_STEP = 40;
@@ -39,6 +40,15 @@ const GAME_KEYS = new Set([
   "ArrowDown",
   "Space",
 ]);
+/** Traducción tecla → acción del motor. */
+const KEY_ACTIONS: Record<string, AsteroidsAction> = {
+  ArrowLeft: "rotateLeft",
+  ArrowRight: "rotateRight",
+  ArrowUp: "thrust",
+  Space: "fire",
+};
+const isAction = (a: string): a is AsteroidsAction =>
+  Object.values(KEY_ACTIONS).includes(a as AsteroidsAction);
 export function createAsteroidsGame(
   canvas: HTMLCanvasElement,
   callbacks: AsteroidsCallbacks,
@@ -65,8 +75,8 @@ export function createAsteroidsGame(
   let deadTimer = 0;
   let powerUpSpawned = false;
   let killsSinceSpawn = 0;
-  let keys: KeyMap = {};
-  let justPressed: KeyMap = {};
+  let keys: ActionMap = {};
+  let justPressed: ActionMap = {};
   let rafId: number | null = null;
   let lastTime: number | null = null;
   let dpr = 0;
@@ -75,19 +85,28 @@ export function createAsteroidsGame(
   let lastHud: AsteroidsHud | null = null;
   // ── Input ───────────────────────────────────────────────────────────────────
   const inProgress = () => phase === "playing" || phase === "dead";
+  function press(action: string) {
+    if (!inProgress() || !isAction(action)) return;
+    if (!keys[action]) justPressed[action] = true;
+    keys[action] = true;
+  }
+  function release(action: string) {
+    if (isAction(action)) keys[action] = false;
+  }
   function onKeyDown(e: KeyboardEvent) {
     if (!inProgress()) return;
     if (GAME_KEYS.has(e.code)) e.preventDefault();
-    if (!keys[e.code]) justPressed[e.code] = true;
-    keys[e.code] = true;
+    const action = KEY_ACTIONS[e.code];
+    if (action) press(action);
   }
   function onKeyUp(e: KeyboardEvent) {
     if (inProgress() && GAME_KEYS.has(e.code)) e.preventDefault();
-    keys[e.code] = false;
+    const action = KEY_ACTIONS[e.code];
+    if (action) release(action);
   }
-  function pressed(code: string) {
-    const val = !!justPressed[code];
-    justPressed[code] = false;
+  function pressed(action: AsteroidsAction) {
+    const val = !!justPressed[action];
+    justPressed[action] = false;
     return val;
   }
   function clearKeys() {
@@ -179,7 +198,7 @@ export function createAsteroidsGame(
       return;
     }
     // Disparar
-    if (pressed("Space")) bullets.push(...ship.tryShoot());
+    if (pressed("fire")) bullets.push(...ship.tryShoot());
     ship.update(dt, keys);
     bullets.forEach((b) => b.update(dt));
     asteroids.forEach((a) => a.update(dt));
@@ -374,5 +393,8 @@ export function createAsteroidsGame(
       listening = false;
       clearKeys();
     },
+    press,
+    release,
+    releaseAll: clearKeys,
   };
 }

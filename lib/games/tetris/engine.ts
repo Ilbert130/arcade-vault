@@ -39,6 +39,7 @@ import {
 import type {
   Board,
   Piece,
+  TetrisAction,
   TetrisCallbacks,
   TetrisGame,
   TetrisHud,
@@ -52,6 +53,17 @@ const GAME_KEYS = new Set([
   "ArrowDown",
   "Space",
 ]);
+/** Traducción tecla → acción del motor. */
+const KEY_ACTIONS: Record<string, TetrisAction> = {
+  ArrowLeft: "moveLeft",
+  ArrowRight: "moveRight",
+  ArrowDown: "softDrop",
+  ArrowUp: "rotate",
+  KeyX: "rotate",
+  Space: "hardDrop",
+};
+/** Acciones que ignoran el auto-repeat del teclado (en el mando no llevan `repeat`). */
+const ONCE_ACTIONS = new Set<TetrisAction>(["rotate", "hardDrop"]);
 const dropIntervalMs = (level: number) =>
   Math.max(MIN_DROP_MS, BASE_DROP_MS - (level - 1) * LEVEL_STEP_MS);
 export function createTetrisGame(
@@ -149,28 +161,34 @@ export function createTetrisGame(
     else lockPiece();
   }
   // ── Input ───────────────────────────────────────────────────────────────────
+  function press(action: string) {
+    if (phase !== "playing") return;
+    switch (action) {
+      case "moveLeft":
+        move(-1);
+        break;
+      case "moveRight":
+        move(1);
+        break;
+      case "softDrop":
+        softDrop();
+        break;
+      case "rotate":
+        if (current) current = tryRotate(board, current);
+        break;
+      case "hardDrop":
+        hardDrop();
+        break;
+    }
+  }
+  // Todas las acciones son por pulsación: no hay estado mantenido que soltar.
+  function release() {}
   function onKeyDown(e: KeyboardEvent) {
     if (phase !== "playing") return;
     if (GAME_KEYS.has(e.code)) e.preventDefault();
-    switch (e.code) {
-      case "ArrowLeft":
-        move(-1);
-        break;
-      case "ArrowRight":
-        move(1);
-        break;
-      case "ArrowDown":
-        softDrop();
-        break;
-      // Rotar y caída dura no se encadenan con el auto-repeat del navegador.
-      case "ArrowUp":
-      case "KeyX":
-        if (!e.repeat && current) current = tryRotate(board, current);
-        break;
-      case "Space":
-        if (!e.repeat) hardDrop();
-        break;
-    }
+    const action = KEY_ACTIONS[e.code];
+    // Rotar y caída dura no se encadenan con el auto-repeat del navegador.
+    if (action && !(e.repeat && ONCE_ACTIONS.has(action))) press(action);
   }
   function onKeyUp(e: KeyboardEvent) {
     if (phase === "playing" && GAME_KEYS.has(e.code)) e.preventDefault();
@@ -345,5 +363,8 @@ export function createTetrisGame(
       window.removeEventListener("keyup", onKeyUp);
       listening = false;
     },
+    press,
+    release,
+    releaseAll: release,
   };
 }

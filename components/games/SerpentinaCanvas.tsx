@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useRef } from "react";
+import type { RefObject } from "react";
 import type { SkinId } from "@/lib/games/skins";
+import type { GameInput } from "@/lib/games/touch";
 import { createSerpentinaGame } from "@/lib/games/serpentina/engine";
 import type {
   SerpentinaGame,
@@ -12,12 +14,14 @@ type SerpentinaCanvasProps = {
   onHud: (hud: SerpentinaHud) => void;
   onGameOver: (finalScore: number) => void;
   skin: SkinId;
+  inputRef?: RefObject<GameInput | null>;
 };
 export default function SerpentinaCanvas({
   status,
   onHud,
   onGameOver,
   skin,
+  inputRef,
 }: SerpentinaCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<SerpentinaGame | null>(null);
@@ -43,12 +47,15 @@ export default function SerpentinaCanvas({
       skinRef.current,
     );
     gameRef.current = game;
+    if (inputRef) inputRef.current = game;
     prevStatusRef.current = "ready";
     return () => {
+      // Antes de destroy(): con StrictMode, el ref no apunta a un motor destruido.
+      if (inputRef) inputRef.current = null;
       game.destroy();
       gameRef.current = null;
     };
-  }, []);
+  }, [inputRef]);
   useEffect(() => {
     skinRef.current = skin;
     gameRef.current?.setSkin(skin);

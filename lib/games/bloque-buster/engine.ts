@@ -37,6 +37,7 @@ import type {
   Ball,
   Block,
   BlockColor,
+  BloqueBusterAction,
   BloqueBusterCallbacks,
   BloqueBusterGame,
   BloqueBusterHud,
@@ -45,6 +46,13 @@ import type {
 } from "./types";
 type Phase = "idle" | "playing" | "paused" | "gameover";
 const GAME_KEYS = new Set(["ArrowLeft", "ArrowRight", "Space"]);
+/** Traducción tecla → acción del motor. */
+const KEY_ACTIONS: Record<string, BloqueBusterAction> = {
+  ArrowLeft: "left",
+  ArrowRight: "right",
+};
+const isAction = (a: string): a is BloqueBusterAction =>
+  a === "left" || a === "right";
 export function createBloqueBusterGame(
   canvas: HTMLCanvasElement,
   callbacks: BloqueBusterCallbacks,
@@ -123,8 +131,7 @@ export function createBloqueBusterGame(
     score = 0;
     lives = START_LIVES;
     paddle.x = (W - paddle.w) / 2;
-    keys.left = false;
-    keys.right = false;
+    releaseAll();
     gameOverEmitted = false;
     loadLevel(1);
   }
@@ -198,16 +205,27 @@ export function createBloqueBusterGame(
     }
   }
   // ── Input ───────────────────────────────────────────────────────────────────
+  function press(action: string) {
+    if (phase !== "playing" || !isAction(action)) return;
+    keys[action] = true;
+  }
+  function release(action: string) {
+    if (isAction(action)) keys[action] = false;
+  }
+  function releaseAll() {
+    keys.left = false;
+    keys.right = false;
+  }
   function onKeyDown(e: KeyboardEvent) {
     if (phase !== "playing") return;
     if (GAME_KEYS.has(e.code)) e.preventDefault();
-    if (e.code === "ArrowLeft") keys.left = true;
-    if (e.code === "ArrowRight") keys.right = true;
+    const action = KEY_ACTIONS[e.code];
+    if (action) press(action);
   }
   function onKeyUp(e: KeyboardEvent) {
     if (GAME_KEYS.has(e.code) && phase === "playing") e.preventDefault();
-    if (e.code === "ArrowLeft") keys.left = false;
-    if (e.code === "ArrowRight") keys.right = false;
+    const action = KEY_ACTIONS[e.code];
+    if (action) release(action);
   }
   function onMouseMove(e: MouseEvent) {
     if (phase !== "playing") return;
@@ -290,8 +308,7 @@ export function createBloqueBusterGame(
     pause() {
       if (phase !== "playing") return;
       phase = "paused";
-      keys.left = false;
-      keys.right = false;
+      releaseAll();
     },
     resume() {
       if (phase !== "paused") return;
@@ -321,5 +338,8 @@ export function createBloqueBusterGame(
       canvas.removeEventListener("mousemove", onMouseMove);
       listening = false;
     },
+    press,
+    release,
+    releaseAll,
   };
 }

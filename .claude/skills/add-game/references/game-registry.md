@@ -11,6 +11,7 @@ export type GameRenderProps = {
   status: "ready" | "playing" | "paused" | "over";
   onHud: (hud: GenericHud) => void;   // GenericHud = { score: number; lives?: number; level?: number; lines?: number }
   onGameOver: (finalScore: number) => void;
+  inputRef: RefObject<GameInput | null>; // el Canvas le asigna su motor (spec 12)
 };
 export type GameEntry = {
   Canvas: React.ComponentType<GameRenderProps>;
@@ -18,6 +19,7 @@ export type GameEntry = {
   controls: string;          // texto de .crt-controls (en español)
   startTitle: string;        // título del overlay de inicio
   startHint?: string;
+  touch: TouchLayout;        // obligatorio: mando táctil del juego (spec 12)
 };
 export const GAME_REGISTRY: Record<string, GameEntry> = { rocas: {...} };
 ```
@@ -30,4 +32,22 @@ Cada `XCanvas` ya recibe `{status, onHud, onGameOver}`; si su `Hud` es más espe
 4. Verificar que ROCAS se comporta igual (spec 05) y que un juego simulado (p. ej. `/juegos/serpentina/jugar`) no cambió.
 
 ## Añadir un juego después
-Una entrada nueva: `{ Canvas: TetrisCanvas, hud: ["score","lines","level"], controls: "← → MOVER · ↑ ROTAR · ↓ CAÍDA · ESPACIO CAÍDA RÁPIDA · P PAUSA", startTitle: "CAÍDA", … }`.
+Una entrada nueva: `{ Canvas: TetrisCanvas, hud: ["score","lines","level"], controls: "← → MOVER · ↑ ROTAR · ↓ CAÍDA · ESPACIO CAÍDA RÁPIDA · P PAUSA", startTitle: "CAÍDA", touch: …, … }`.
+
+## Mando táctil (`touch`, spec 12)
+Todo juego del registry declara su `touch` (si falta, `npm run build` falla). Tipos en `lib/games/touch.ts`; el mando lo pinta `components/games/TouchPad.tsx` desde `GamePlayer`, solo visible con `@media (pointer: coarse)`.
+
+```ts
+touch: touchLayout<TetrisAction>([
+  { slot: "left", action: "moveLeft", label: "MOVER", repeat: true },
+  { slot: "right", action: "moveRight", label: "MOVER", repeat: true },
+  { slot: "down", action: "softDrop", label: "BAJAR", repeat: true },
+  { slot: "a", action: "rotate", label: "ROTAR" },
+  { slot: "b", action: "hardDrop", label: "SOLTAR" },
+]),
+```
+- `slot`: `up | down | left | right` (cruceta) o `a | b` (botones). Solo se pintan los slots declarados.
+- `action`: una acción de la unión `XAction` del motor; `touchLayout<XAction>()` hace que una acción mal escrita falle en `tsc`.
+- `label`: texto corto en mayúsculas (`""` si el glifo basta, como SERPENTINA).
+- `repeat: true` para acciones de pulsación que deben repetirse al mantener (170 ms de espera, luego cada 50 ms); las acciones mantenidas del motor (girar, mover la pala) no lo llevan.
+- EMPEZAR y PAUSA siguen siendo los botones de `GamePlayer`; el mando no arranca ni pausa.

@@ -1,7 +1,7 @@
 # 11 — INVASORES: shooter de formaciones alienígenas con racha y cápsulas
 
 **Estado:** Borrador
-**Depende de:** SPEC 05-asteroides-rocas, SPEC 06-leaderboard-tabla-juegos, SPEC 10-snake-serpentina
+**Depende de:** SPEC 05-asteroides-rocas, SPEC 06-leaderboard-tabla-juegos, SPEC 10-snake-serpentina, SPEC 12-controles-tactiles-movil
 **Fecha:** 2026-10-18
 
 **Objetivo:** Crear desde cero un shooter de formaciones como motor TS jugable en el CRT de `/juegos/invasores/jugar` y activar su leaderboard (`playable = true` sobre la fila ya sembrada).
@@ -10,9 +10,9 @@
 
 **Incluye:**
 
-- Motor `lib/games/invasores/` (types, constants, entities, engine) con contrato `{ start, pause, resume, reset, destroy }` y callbacks `onHud`/`onGameOver`.
-- Componente `components/games/InvasoresCanvas.tsx` (patrón de `SerpentinaCanvas`).
-- Entrada `invasores` en `components/games/registry.tsx`: `hud: ["score", "lives", "level"]`, `controls: "← → / A D MOVER · ESPACIO / Z DISPARAR · P PAUSA"`, `startTitle: "INVASORES"`, `startHint: "PULSA ESPACIO PARA EMPEZAR"`.
+- Motor `lib/games/invasores/` (types, constants, entities, engine) con contrato `{ start, pause, resume, reset, destroy, press, release, releaseAll }` (unión `InvasoresAction = "left" | "right" | "fire"`, el teclado pasa por `press`/`release`) y callbacks `onHud`/`onGameOver`.
+- Componente `components/games/InvasoresCanvas.tsx` (patrón de `SerpentinaCanvas`, incluido `inputRef`).
+- Entrada `invasores` en `components/games/registry.tsx`: `hud: ["score", "lives", "level"]`, `controls: "← → / A D MOVER · ESPACIO / Z DISPARAR · P PAUSA"`, `startTitle: "INVASORES"`, `startHint: "PULSA ESPACIO PARA EMPEZAR"` y `touch` (mando táctil, SPEC 12): ◀/▶ → `left`/`right` "MOVER" y A → `fire` "DISPARAR", sin `repeat` (se mantienen).
 - Migración `supabase/migrations/<timestamp>_invasores_playable.sql` (`update public.games set playable = true where id = 'invasores';`), aplicada con el MCP de Supabase + `get_advisors`.
 - Estilos `.invasores-canvas` en `app/globals.css` (diseñados con `/frontend-design`, tokens CRT existentes; la portada `.cover-invaders` ya existe y no se toca).
 - Dibujo 100 % procedural en canvas (sprites de alienígenas definidos como matrices de bits en `constants.ts`, dos fotogramas de animación).
@@ -23,7 +23,6 @@
 
 - Sonido.
 - Alienígenas que rompen formación en picado, jefes, o modo dos jugadores.
-- Mando táctil / controles en pantalla.
 - Overlays de pausa/game over en canvas (los pinta `GamePlayer`).
 - Anti-trampas ni cambios en `saveScore`, vistas o modal.
 - Cambios de esquema (no se regeneran tipos).
@@ -136,6 +135,7 @@ specs/11-invasores.md                                       este spec
 - [ ] Flechas y Espacio no hacen scroll ni activan botones durante la partida; teclas no quedan pegadas tras pausar.
 - [ ] `games.playable = true` para `invasores` en el proyecto remoto; `get_advisors` sin avisos nuevos.
 - [ ] Invitado: "INICIA SESIÓN PARA GUARDAR TU MARCA" → `/auth`. Con sesión: se guarda y aparece en `/juegos/invasores` y `/salon?juego=invasores`.
+- [ ] Con emulación táctil se ve el mando con ◀ ▶ y A: mantener ◀/▶ mueve el cañón y A dispara; no quedan acciones pegadas al pausar.
 - [ ] ROCAS, CAÍDA, BLOQUE BUSTER, SERPENTINA y los simulados no cambian.
 - [ ] `npm run build` y `npm run lint` sin errores; consola sin errores.
 

@@ -1,20 +1,24 @@
 "use client";
 import { useEffect, useRef } from "react";
+import type { RefObject } from "react";
 import { createAsteroidsGame } from "@/lib/games/asteroids/engine";
 import type { AsteroidsGame, AsteroidsHud } from "@/lib/games/asteroids/types";
 import type { SkinId } from "@/lib/games/skins";
+import type { GameInput } from "@/lib/games/touch";
 export type AsteroidsStatus = "ready" | "playing" | "paused" | "over";
 type AsteroidsCanvasProps = {
   status: AsteroidsStatus;
   skin: SkinId;
   onHud: (hud: AsteroidsHud) => void;
   onGameOver: (finalScore: number) => void;
+  inputRef?: RefObject<GameInput | null>;
 };
 export default function AsteroidsCanvas({
   status,
   skin,
   onHud,
   onGameOver,
+  inputRef,
 }: AsteroidsCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<AsteroidsGame | null>(null);
@@ -40,12 +44,15 @@ export default function AsteroidsCanvas({
       skinRef.current,
     );
     gameRef.current = game;
+    if (inputRef) inputRef.current = game;
     prevStatusRef.current = "ready";
     return () => {
+      // Antes de destroy(): con StrictMode, el ref no apunta a un motor destruido.
+      if (inputRef) inputRef.current = null;
       game.destroy();
       gameRef.current = null;
     };
-  }, []);
+  }, [inputRef]);
   useEffect(() => {
     skinRef.current = skin;
     gameRef.current?.setSkin(skin);

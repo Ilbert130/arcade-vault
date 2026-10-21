@@ -8,6 +8,8 @@ import type { Game } from "@/lib/games/types";
 import { getCurrentUsername } from "@/lib/supabase/client";
 import { GAME_REGISTRY } from "@/components/games/registry";
 import type { GameStatus, GenericHud } from "@/components/games/registry";
+import TouchPad from "@/components/games/TouchPad";
+import type { GameInput } from "@/lib/games/touch";
 import {
   DEFAULT_SKIN,
   SKIN_IDS,
@@ -123,6 +125,12 @@ export default function GamePlayer({ game }: { game: Game }) {
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
+  // Motor del juego real (lo asigna su Canvas); el mando táctil le envía las acciones.
+  const inputRef = useRef<GameInput | null>(null);
+  // Al pausar, terminar o volver a "ready" no queda ninguna acción mantenida.
+  useEffect(() => {
+    if (status !== "playing") inputRef.current?.releaseAll();
+  }, [status]);
   const paused = status === "paused";
   const over = status === "over";
   // null (invitado) en el primer render; el efecto lo sustituye por el username si hay sesión.
@@ -160,7 +168,10 @@ export default function GamePlayer({ game }: { game: Game }) {
         setStatus(togglePause);
       }
     };
-    const autoPause = () => setStatus((s) => (s === "playing" ? "paused" : s));
+    const autoPause = () => {
+      inputRef.current?.releaseAll();
+      setStatus((s) => (s === "playing" ? "paused" : s));
+    };
     const onVisibility = () => {
       if (document.hidden) autoPause();
     };
@@ -245,101 +256,126 @@ export default function GamePlayer({ game }: { game: Game }) {
           )}
         </div>
         <div className="hud-actions">
+          {/* En móvil estrecho solo se ve el icono; el nombre sigue en aria-label. */}
           <button
             className="btn yellow"
+            aria-label={paused ? "Reanudar" : "Pausa"}
             onClick={(e) => {
               blurTarget(e);
               setStatus(togglePause);
             }}
           >
-            {paused ? "REANUDAR" : "PAUSA"}
+            <span className="hud-btn-icon" aria-hidden="true">
+              {paused ? "▶" : "II"}
+            </span>
+            <span className="hud-btn-text">
+              {paused ? "REANUDAR" : "PAUSA"}
+            </span>
           </button>
           <button
             className="btn magenta"
+            aria-label="Fin"
             onClick={(e) => {
               blurTarget(e);
               endGame();
             }}
           >
-            FIN
+            <span className="hud-btn-icon" aria-hidden="true">
+              ■
+            </span>
+            <span className="hud-btn-text">FIN</span>
           </button>
           <button
             className="btn ghost"
+            aria-label="Salir"
             onClick={() => router.push(`/juegos/${game.id}`)}
           >
-            SALIR
+            <span className="hud-btn-icon" aria-hidden="true">
+              ✕
+            </span>
+            <span className="hud-btn-text">SALIR</span>
           </button>
         </div>
       </div>
       {entry && <SkinSwitch value={skin} onChange={changeSkin} />}
-      <div className="crt">
-        <div className="crt-screen">
-          {entry ? (
-            <entry.Canvas
-              status={status}
-              skin={skin}
-              onHud={handleHud}
-              onGameOver={handleGameOver}
-            />
-          ) : (
-            <div className="game-arena">
-              <div className="grid-floor"></div>
-              <div className="enemy e1"></div>
-              <div className="enemy e2"></div>
-              <div className="enemy e3"></div>
-              <div className="player-ship"></div>
-            </div>
-          )}
-          {entry && status === "ready" && (
-            <div className="crt-content game-start">
-              <div className="game-start-inner">
-                <div className="game-start-title pixel">{entry.startTitle}</div>
-                <div className="game-start-prompt pixel">{entry.startHint}</div>
-                <button
-                  className="btn"
-                  onClick={(e) => {
-                    blurTarget(e);
-                    setStatus("playing");
-                  }}
-                >
-                  EMPEZAR
-                </button>
+      <div className="player-stage">
+        <div className="crt">
+          <div className="crt-screen">
+            {entry ? (
+              <entry.Canvas
+                status={status}
+                skin={skin}
+                onHud={handleHud}
+                onGameOver={handleGameOver}
+                inputRef={inputRef}
+              />
+            ) : (
+              <div className="game-arena">
+                <div className="grid-floor"></div>
+                <div className="enemy e1"></div>
+                <div className="enemy e2"></div>
+                <div className="enemy e3"></div>
+                <div className="player-ship"></div>
               </div>
-            </div>
-          )}
-          {paused && (
-            <div
-              className="crt-content"
-              style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
-            >
-              <div>
-                <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
-                  EN PAUSA
-                </div>
-                <div
-                  className="mono"
-                  style={{
-                    fontSize: 11,
-                    color: "var(--ink-dim)",
-                    marginTop: 10,
-                    letterSpacing: "0.16em",
-                  }}
-                >
-                  PULSA REANUDAR PARA CONTINUAR
+            )}
+            {entry && status === "ready" && (
+              <div className="crt-content game-start">
+                <div className="game-start-inner">
+                  <div className="game-start-title pixel">
+                    {entry.startTitle}
+                  </div>
+                  <div className="game-start-prompt pixel">
+                    {entry.startHint}
+                  </div>
+                  <button
+                    className="btn"
+                    onClick={(e) => {
+                      blurTarget(e);
+                      setStatus("playing");
+                    }}
+                  >
+                    EMPEZAR
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+            {paused && (
+              <div
+                className="crt-content"
+                style={{ background: "rgba(0,0,0,0.6)", zIndex: 5 }}
+              >
+                <div>
+                  <div className="pixel neon-yellow" style={{ fontSize: 22 }}>
+                    EN PAUSA
+                  </div>
+                  <div
+                    className="mono"
+                    style={{
+                      fontSize: 11,
+                      color: "var(--ink-dim)",
+                      marginTop: 10,
+                      letterSpacing: "0.16em",
+                    }}
+                  >
+                    PULSA REANUDAR PARA CONTINUAR
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="crt-bottom">
+            <span className="led">SEÑAL OK</span>
+            <span>{game.title} · CRT-83 · 60 HZ</span>
+            {entry ? (
+              <span className="crt-controls">{entry.controls}</span>
+            ) : (
+              <span>CARGA · 1MB</span>
+            )}
+          </div>
         </div>
-        <div className="crt-bottom">
-          <span className="led">SEÑAL OK</span>
-          <span>{game.title} · CRT-83 · 60 HZ</span>
-          {entry ? (
-            <span className="crt-controls">{entry.controls}</span>
-          ) : (
-            <span>CARGA · 1MB</span>
-          )}
-        </div>
+        {entry && (
+          <TouchPad layout={entry.touch} status={status} inputRef={inputRef} />
+        )}
       </div>
       {over && (
         <div className="modal-bd">

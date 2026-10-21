@@ -33,6 +33,7 @@ import type {
   Cell,
   Direction,
   Fruit,
+  SerpentinaAction,
   SerpentinaCallbacks,
   SerpentinaGame,
   SerpentinaHud,
@@ -176,13 +177,19 @@ export function createSerpentinaGame(
     }
   }
   // ── Input ───────────────────────────────────────────────────────────────────
+  function press(action: string) {
+    if (phase !== "playing" || !(action in OPPOSITE)) return;
+    queueTurn(action as SerpentinaAction);
+  }
+  // Los giros son por pulsación: no hay estado mantenido que soltar.
+  function release() {}
   function onKeyDown(e: KeyboardEvent) {
     if (phase !== "playing") return;
     if (BLOCKED_KEYS.has(e.code) || BLOCKED_KEYS.has(e.key)) e.preventDefault();
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     const dir = KEY_TO_DIRECTION[key];
-    if (dir) queueTurn(dir);
+    if (dir) press(dir);
   }
   function onKeyUp(e: KeyboardEvent) {
     if (
@@ -280,5 +287,8 @@ export function createSerpentinaGame(
       window.removeEventListener("keyup", onKeyUp);
       listening = false;
     },
+    press,
+    release,
+    releaseAll: release,
   };
 }

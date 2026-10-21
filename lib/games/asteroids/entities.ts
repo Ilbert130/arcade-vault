@@ -16,7 +16,7 @@ import {
   W,
 } from "./constants";
 import type { AsteroidsSkin } from "./skins";
-import type { KeyMap } from "./types";
+import type { ActionMap } from "./types";
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export const wrap = (v: number, max: number) => ((v % max) + max) % max;
 export const dist = (
@@ -227,14 +227,14 @@ export class Ship {
     this.shootCooldown = 0;
     this.dead = false;
   }
-  update(dt: number, keys: KeyMap) {
+  update(dt: number, keys: ActionMap) {
     if (this.dead) return;
     if (this.invincible > 0) this.invincible -= dt;
     if (this.shootCooldown > 0) this.shootCooldown -= dt;
     if (this.tripleShot > 0) this.tripleShot -= dt;
-    if (keys["ArrowLeft"]) this.angle -= SHIP_ROT * dt;
-    if (keys["ArrowRight"]) this.angle += SHIP_ROT * dt;
-    this.thrusting = !!keys["ArrowUp"];
+    if (keys.rotateLeft) this.angle -= SHIP_ROT * dt;
+    if (keys.rotateRight) this.angle += SHIP_ROT * dt;
+    this.thrusting = !!keys.thrust;
     if (this.thrusting) {
       this.vx += Math.cos(this.angle) * SHIP_THRUST * dt;
       this.vy += Math.sin(this.angle) * SHIP_THRUST * dt;

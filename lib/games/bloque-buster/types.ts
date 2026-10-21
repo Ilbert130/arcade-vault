@@ -17,7 +17,12 @@ export type BloqueBusterGame = {
   reset: () => void; // estado inicial sin arrancar
   setSkin: (id: SkinId) => void; // cambia la skin y redibuja (solo cosmético)
   destroy: () => void; // cancela rAF y elimina listeners
+  press: (action: string) => void; // = keydown de la acción; desconocidas se ignoran
+  release: (action: string) => void; // = keyup de la acción
+  releaseAll: () => void; // suelta todas las acciones mantenidas
 };
+/** Acciones de entrada del motor (teclado y mando táctil); el ratón va aparte. */
+export type BloqueBusterAction = "left" | "right";
 export type BlockColor =
   "gray" | "red" | "yellow" | "cyan" | "magenta" | "hotpink" | "green";
 export type Rect = { x: number; y: number; w: number; h: number };
