@@ -39,6 +39,9 @@ Estados: `propuesto` · `aceptado` · `rechazado` · `implementado`
 | 2026-10-16 | `punos`          | PUÑOS          | VERSUS  | propuesto | Lote de 20 (nota 3, esfuerzo 3). Boxing Atari; poca profundidad. Descartado HOCKEY NEÓN por solapar con `duelo-pixel`.                                      |
 | 2026-10-18 | `formacion`      | FORMACIÓN      | PUZZLE  | propuesto | game-jam 'Invasores' (prop. B). Match-3 por intercambio con flota que desciende; 48/60.                                                                     |
 | 2026-10-18 | `nodriza`        | NODRIZA        | VERSUS  | propuesto | game-jam 'Invasores' (prop. C). Invasión al revés vs cañón CPU; llenaría VERSUS; 50/60, riesgo IA.                                                          |
+| 2026-10-27 | `anzuelo`        | ANZUELO        | ARCADE  | aceptado  | Ganador game-jam 'fondo del mar' → specs/13-anzuelo.md (pesca de riesgo, 49.5/60).                                                                          |
+| 2026-10-27 | `lonja`          | LONJA          | PUZZLE  | propuesto | game-jam 'fondo del mar' (prop. B). Clasificar peces en 4 nasas con cinta que desborda; 47.5/60.                                                            |
+| 2026-10-27 | `batiscafo`      | BATISCAFO      | VERSUS  | propuesto | game-jam 'fondo del mar' (prop. C). Duelo submarino vs CPU por flotabilidad; llenaría VERSUS; 47.5/60, riesgo IA/inercia. Segunda opción.                    |
 
 ## Preferencias del usuario
 
