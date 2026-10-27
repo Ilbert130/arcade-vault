@@ -34,8 +34,8 @@ Cada `XCanvas` ya recibe `{status, onHud, onGameOver}`; si su `Hud` es más espe
 ## Añadir un juego después
 Una entrada nueva: `{ Canvas: TetrisCanvas, hud: ["score","lines","level"], controls: "← → MOVER · ↑ ROTAR · ↓ CAÍDA · ESPACIO CAÍDA RÁPIDA · P PAUSA", startTitle: "CAÍDA", touch: …, … }`.
 
-## Mando táctil (`touch`, spec 12)
-Todo juego del registry declara su `touch` (si falta, `npm run build` falla). Tipos en `lib/games/touch.ts`; el mando lo pinta `components/games/TouchPad.tsx` desde `GamePlayer`, solo visible con `@media (pointer: coarse)`.
+## Mando táctil (`touch`, specs 12 y 13)
+Todo juego del registry declara su `touch` (si falta, `npm run build` falla). Tipos en `lib/games/touch.ts`; el mando lo pinta `components/games/TouchPad.tsx` desde `GamePlayer`, solo visible con `@media (pointer: coarse)`. Su aspecto es el Gamepad MK-II (spec 13): la silueta es la misma en todos los juegos y su paleta sigue la skin del reproductor; un juego nuevo no añade CSS del mando.
 
 ```ts
 touch: touchLayout<TetrisAction>([
@@ -46,8 +46,8 @@ touch: touchLayout<TetrisAction>([
   { slot: "b", action: "hardDrop", label: "SOLTAR" },
 ]),
 ```
-- `slot`: `up | down | left | right` (cruceta) o `a | b` (botones). Solo se pintan los slots declarados.
+- `slot`: `up | down | left | right` (cruceta) o `a | b` (botones). Siempre se pintan los 6 slots: los no declarados salen **inertes** (apagados, `aria-disabled`, sin handlers), así que no declares un slot sin acción solo para rellenar.
 - `action`: una acción de la unión `XAction` del motor; `touchLayout<XAction>()` hace que una acción mal escrita falle en `tsc`.
-- `label`: texto corto en mayúsculas (`""` si el glifo basta, como SERPENTINA).
+- `label`: texto corto en mayúsculas. Solo se **ve** en A/B, como serigrafía bajo el botón (mantenlo corto: ~8 caracteres); en la cruceta solo va al `aria-label` (`""` si la flecha basta, como SERPENTINA).
 - `repeat: true` para acciones de pulsación que deben repetirse al mantener (170 ms de espera, luego cada 50 ms); las acciones mantenidas del motor (girar, mover la pala) no lo llevan.
 - EMPEZAR y PAUSA siguen siendo los botones de `GamePlayer`; el mando no arranca ni pausa.
