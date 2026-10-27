@@ -7,10 +7,12 @@ import type { AsteroidsAction } from "@/lib/games/asteroids/types";
 import type { TetrisAction } from "@/lib/games/tetris/types";
 import type { BloqueBusterAction } from "@/lib/games/bloque-buster/types";
 import type { SerpentinaAction } from "@/lib/games/serpentina/types";
+import type { RanariaAction } from "@/lib/games/ranaria/types";
 import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
 import TetrisCanvas from "@/components/games/TetrisCanvas";
 import BloqueBusterCanvas from "@/components/games/BloqueBusterCanvas";
 import SerpentinaCanvas from "@/components/games/SerpentinaCanvas";
+import RanariaCanvas from "@/components/games/RanariaCanvas";
 export type GameStatus = "ready" | "playing" | "paused" | "over";
 export type HudField = "score" | "lives" | "level" | "lines";
 // Superconjunto de los HUD de cada motor; GamePlayer solo lee los campos de `entry.hud`.
@@ -83,6 +85,19 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     startTitle: "SERPENTINA",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
     touch: touchLayout<SerpentinaAction>([
+      { slot: "up", action: "up", label: "" },
+      { slot: "down", action: "down", label: "" },
+      { slot: "left", action: "left", label: "" },
+      { slot: "right", action: "right", label: "" },
+    ]),
+  },
+  ranaria: {
+    Canvas: RanariaCanvas,
+    hud: ["score", "lives", "level"],
+    controls: "← ↑ → ↓ / WASD SALTAR · P PAUSA",
+    startTitle: "RANARIA",
+    startHint: "PULSA ESPACIO PARA EMPEZAR",
+    touch: touchLayout<RanariaAction>([
       { slot: "up", action: "up", label: "" },
       { slot: "down", action: "down", label: "" },
       { slot: "left", action: "left", label: "" },

@@ -22,21 +22,24 @@
 
 ## Estado por página/juego
 
-| Página / juego        | m-xs | m-md | l-md | tab | escritorio | Fecha      | Notas                                      |
-| --------------------- | ---- | ---- | ---- | --- | ---------- | ---------- | ------------------------------------------ |
-| `rocas` jugar         | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | spec 13 OK, 3 skins                        |
-| `caida` jugar         | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | idem; puntero real verificado              |
-| `bloque-buster` jugar | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | idem; ▲▼/A/B inertes                       |
-| `serpentina` jugar    | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | idem; A/B inertes                          |
-| `/` Home              | ?    | ?    | ?    | ?   | ?          | —          | nunca revisada en móvil                    |
-| `/biblioteca`         | ?    | ?    | ?    | ?   | ?          | —          | idem                                       |
-| `/salon`              | ?    | ?    | ?    | ?   | ?          | —          | idem                                       |
-| `/juegos/<id>`        | ?    | ?    | ?    | ?   | ?          | —          | idem                                       |
-| `/about`, `/auth`     | ?    | ?    | ?    | ?   | ?          | —          | revisar `font-size` ≥ 16px en inputs (iOS) |
+| Página / juego        | m-xs | m-md | l-md | tab | escritorio | Fecha      | Notas                                                                                                      |
+| --------------------- | ---- | ---- | ---- | --- | ---------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| `rocas` jugar         | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | spec 13 OK, 3 skins                                                                                        |
+| `caida` jugar         | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | idem; puntero real verificado                                                                              |
+| `bloque-buster` jugar | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | idem; ▲▼/A/B inertes                                                                                       |
+| `serpentina` jugar    | ?    | ✅   | ✅   | ✅  | ✅         | 2026-10-20 | idem; A/B inertes                                                                                          |
+| `ranaria` jugar       | ⚠️   | ⚠️   | ⚠️   | ✅  | ✅         | 2026-10-22 | SOLO estático (sin Chrome MCP): CSS = igual que otros; HUD interno del canvas ~6,5 px a 390 (ver abiertos) |
+| `/` Home              | ?    | ?    | ?    | ?   | ?          | —          | nunca revisada en móvil                                                                                    |
+| `/biblioteca`         | ?    | ?    | ?    | ?   | ?          | —          | idem                                                                                                       |
+| `/salon`              | ?    | ?    | ?    | ?   | ?          | —          | idem                                                                                                       |
+| `/juegos/<id>`        | ?    | ?    | ?    | ?   | ?          | —          | idem                                                                                                       |
+| `/about`, `/auth`     | ?    | ?    | ?    | ?   | ?          | —          | revisar `font-size` ≥ 16px en inputs (iOS)                                                                 |
 
 Pendiente: m-xs (320×568), m-sm, m-lg, l-sm (667×375), d-narr y páginas no-juego.
 
 ## Problemas abiertos (menores)
+
+- RANARIA (2026-10-22, sin verificar en navegador: no había Chrome DevTools MCP en esa invocación): mundo 800×600 se escala a CRT 4:3; en 390 px escala ≈0,46 → HUD interno `lib/games/ranaria/draw.ts:376-385` (14/16 px lógicos) sale a ~6,5–7,4 px (≈5 px en 320). Celda 40 px lógicos → ~18 px. HUD del `GamePlayer` ya muestra puntos/vidas/nivel, así que es redundante. Arreglo real = spec (tablero vertical 8:7 en móvil o HUD escalado), no CSS. D-pad sin `repeat` (`registry.tsx` ranaria): SPEC 12 sugiere `repeat` en movimiento por casillas, pero el motor ignora `e.repeat` a propósito (un toque = un salto); decisión de jugabilidad, no tocada. `.ranaria-canvas` CSS idéntico a los demás (absolute, 100%).
 
 - `components/Nav.tsx:123` `.av-mobile-panel` cerrado queda fuera de pantalla con `translateX` pero sin `inert`/`aria-hidden`/`visibility:hidden`: sigue en el árbol a11y y es tabulable. No causa scroll. No propuesto como spec.
 - Anillo discontinuo de A/B pulsado (`.touch-btn-ring`, inset −11 %) cruza la serigrafía `.touch-silk` debajo (visible en 390 y 844). Cosmético.

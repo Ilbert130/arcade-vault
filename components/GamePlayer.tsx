@@ -1,5 +1,11 @@
 "use client";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -18,6 +24,10 @@ import {
 } from "@/lib/games/skins";
 import type { SkinId } from "@/lib/games/skins";
 const START_LIVES = 3;
+// Formato de cada valor del HUD (se escribe directo en el DOM, sin pasar por React).
+const fmtScore = (n: number) => n.toLocaleString("es-ES");
+const fmtLives = (n: number) => "♥ ".repeat(n).trim() || "—";
+const fmtLevel = (n: number) => String(n).padStart(2, "0");
 // Tras pulsar un botón se le quita el foco para que Espacio no vuelva a activarlo.
 const blurTarget = (e: MouseEvent<HTMLButtonElement>) => e.currentTarget.blur();
 const togglePause = (s: GameStatus): GameStatus =>
@@ -112,11 +122,28 @@ export default function GamePlayer({ game }: { game: Game }) {
     () => DEFAULT_SKIN,
   );
   const changeSkin = (next: SkinId) => writeSkin(game.id, next);
-  const [score, setScore] = useState(0);
+  // El HUD cambia con cada jugada: vive en refs y se escribe en el DOM (sin re-renders).
   const scoreRef = useRef(0);
-  const [lives, setLives] = useState(START_LIVES);
-  const [level, setLevel] = useState(1);
-  const [lines, setLines] = useState(0);
+  const levelRef = useRef(1);
+  const scoreEl = useRef<HTMLDivElement>(null);
+  const livesEl = useRef<HTMLDivElement>(null);
+  const linesEl = useRef<HTMLDivElement>(null);
+  const levelEl = useRef<HTMLDivElement>(null);
+  const paintHud = useCallback((hud: Partial<GenericHud>) => {
+    const put = (el: HTMLDivElement | null, text: string) => {
+      if (el && el.textContent !== text) el.textContent = text;
+    };
+    if (hud.score !== undefined) {
+      scoreRef.current = hud.score;
+      put(scoreEl.current, fmtScore(hud.score));
+    }
+    if (hud.lives !== undefined) put(livesEl.current, fmtLives(hud.lives));
+    if (hud.level !== undefined) {
+      levelRef.current = hud.level;
+      put(levelEl.current, fmtLevel(hud.level));
+    }
+    if (hud.lines !== undefined) put(linesEl.current, fmtScore(hud.lines));
+  }, []);
   // Los juegos reales esperan en "ready" a que el jugador empiece; la simulación arranca jugando.
   const [status, setStatus] = useState<GameStatus>(
     isReal ? "ready" : "playing",
@@ -125,6 +152,14 @@ export default function GamePlayer({ game }: { game: Game }) {
   useEffect(() => {
     statusRef.current = status;
   }, [status]);
+  // Modo reproductor: apaga los efectos globales pesados de la página (ver globals.css).
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.player = "";
+    return () => {
+      delete root.dataset.player;
+    };
+  }, []);
   // Motor del juego real (lo asigna su Canvas); el mando táctil le envía las acciones.
   const inputRef = useRef<GameInput | null>(null);
   // Al pausar, terminar o volver a "ready" no queda ninguna acción mantenida.
@@ -151,12 +186,13 @@ export default function GamePlayer({ game }: { game: Game }) {
     const t = setInterval(() => {
       // Subir de nivel en el mismo tick que actualiza la puntuación (sin efecto aparte).
       const next = scoreRef.current + Math.floor(10 + Math.random() * 90);
-      scoreRef.current = next;
-      setScore(next);
-      if (next % 2500 < 100) setLevel((l) => l + 1);
+      paintHud({
+        score: next,
+        level: next % 2500 < 100 ? levelRef.current + 1 : undefined,
+      });
     }, 220);
     return () => clearInterval(t);
-  }, [isReal, status]);
+  }, [isReal, status, paintHud]);
   // Juegos reales: Espacio empieza, P / Escape alternan pausa; ocultar la pestaña o perder el foco pausa.
   useEffect(() => {
     if (!isReal) return;
@@ -184,32 +220,28 @@ export default function GamePlayer({ game }: { game: Game }) {
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [isReal]);
-  const handleHud = (hud: GenericHud) => {
-    scoreRef.current = hud.score;
-    setScore(hud.score);
-    if (hud.lives !== undefined) setLives(hud.lives);
-    if (hud.level !== undefined) setLevel(hud.level);
-    if (hud.lines !== undefined) setLines(hud.lines);
-  };
-  const handleGameOver = (finalScore: number) => {
-    scoreRef.current = finalScore;
-    setScore(finalScore);
-    setStatus("over");
-  };
+  // Identidad estable: los Canvas no re-ejecutan efectos ni se re-renderizan por ellos.
+  const handleHud = useCallback((hud: GenericHud) => paintHud(hud), [paintHud]);
+  const handleGameOver = useCallback(
+    (finalScore: number) => {
+      paintHud({ score: finalScore });
+      setStatus("over");
+    },
+    [paintHud, setStatus],
+  );
   const endGame = () => setStatus("over");
   const restart = () => {
-    scoreRef.current = 0;
-    setScore(0);
-    setLives(START_LIVES);
-    setLevel(1);
-    setLines(0);
+    paintHud({ score: 0, lives: START_LIVES, level: 1, lines: 0 });
     setStatus(isReal ? "ready" : "playing");
     setSave({ status: "idle" });
   };
   const submitScore = async () => {
     setSave({ status: "saving" });
     try {
-      const result = await saveScore({ gameId: game.id, score });
+      const result = await saveScore({
+        gameId: game.id,
+        score: scoreRef.current,
+      });
       setSave(
         result.ok
           ? { status: "saved" }
@@ -234,24 +266,32 @@ export default function GamePlayer({ game }: { game: Game }) {
           </div>
           <div className="hud-stat">
             <div className="l">Puntuación</div>
-            <div className="v">{score.toLocaleString("es-ES")}</div>
+            <div className="v" ref={scoreEl}>
+              {fmtScore(0)}
+            </div>
           </div>
           {hudFields.includes("lives") && (
             <div className="hud-stat lives">
               <div className="l">Vidas</div>
-              <div className="v">{"♥ ".repeat(lives).trim() || "—"}</div>
+              <div className="v" ref={livesEl}>
+                {fmtLives(START_LIVES)}
+              </div>
             </div>
           )}
           {hudFields.includes("lines") && (
             <div className="hud-stat lines">
               <div className="l">Líneas</div>
-              <div className="v">{lines.toLocaleString("es-ES")}</div>
+              <div className="v" ref={linesEl}>
+                {fmtScore(0)}
+              </div>
             </div>
           )}
           {hudFields.includes("level") && (
             <div className="hud-stat level">
               <div className="l">Nivel</div>
-              <div className="v">{String(level).padStart(2, "0")}</div>
+              <div className="v" ref={levelEl}>
+                {fmtLevel(1)}
+              </div>
             </div>
           )}
         </div>
@@ -387,7 +427,13 @@ export default function GamePlayer({ game }: { game: Game }) {
           <div className="modal">
             <h2>FIN DEL JUEGO</h2>
             <div className="final-label">PUNTUACIÓN FINAL</div>
-            <div className="final">{score.toLocaleString("es-ES")}</div>
+            {/* La puntuación final se lee del ref al montar el modal (no hay estado por jugada). */}
+            <div
+              className="final"
+              ref={(el) => {
+                if (el) el.textContent = fmtScore(scoreRef.current);
+              }}
+            />
             {!game.playable ? (
               <div className="save-note demo">
                 PUNTUACIÓN NO CLASIFICABLE (DEMO)

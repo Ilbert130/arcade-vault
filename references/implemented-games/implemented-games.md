@@ -6,3 +6,4 @@
 | `caida`         | CAÍDA         | PUZZLE    | Encaja las piezas antes de que el techo te aplaste. | magenta |
 | `serpentina`    | SERPENTINA    | ARCADE    | Crece sin morder tu propia cola.                    | green   |
 | `rocas`         | ROCAS         | SHOOTER   | Pulveriza asteroides en gravedad cero.              | yellow  |
+| `ranaria`       | RANARIA       | ARCADE    | Cruza la autopista de pixeles.                      | green   |
