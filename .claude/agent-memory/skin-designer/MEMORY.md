@@ -2,8 +2,8 @@
 
 ## Infraestructura (al 2026-10-18)
 
-- Contrato **implementado**: `lib/games/skins.ts` (SKIN_IDS/SkinId/DEFAULT_SKIN/SKIN_LABELS/isSkinId), `skin: SkinId` en `GameRenderProps` (`components/games/registry.tsx`).
-- Selector `SkinSwitch` en `components/GamePlayer.tsx` (ASPECTO: CLÁSICO · NEÓN · RETRO), `useSyncExternalStore` + `localStorage` `av-skin:<gameId>`, no roba foco; estilos `.skin-switch`/`.skin-opt`/`.skin-led` al final de `app/globals.css`. Visible en todos los juegos; los canvas sin soporte ignoran la prop.
+- Contrato **implementado**: `lib/games/platform/skins.ts` (SKIN_IDS/SkinId/DEFAULT_SKIN/SKIN_LABELS/isSkinId), `skin: SkinId` en `GameRenderProps` (`components/games/registry.tsx`).
+- Selector `components/player/SkinSwitch.tsx` + hook `useGameSkin.ts`, usado por `components/player/GamePlayer.tsx` (ASPECTO: CLÁSICO · NEÓN · RETRO), `useSyncExternalStore` + `localStorage` `av-skin:<gameId>`, no roba foco; estilos `.skin-switch`/`.skin-opt`/`.skin-led` en `app/styles/skin-switch.css`. Visible en todos los juegos; los canvas sin soporte ignoran la prop.
 - Juegos sin skins aún usan su `PALETTE` en `constants.ts` (base de `clasico`).
 
 ## Estado por juego

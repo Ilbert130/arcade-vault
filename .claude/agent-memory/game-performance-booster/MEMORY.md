@@ -4,7 +4,7 @@ Sembrada el 2026-10-27 con los resultados del spec 14 (`specs/14-performance-efe
 
 ## Infraestructura vigente (spec 14)
 
-- `GamePlayer` pone `data-player` en `<html>`; `app/globals.css` apaga bajo `html[data-player]` la rejilla animada `.av-bg::before` y oculta `.av-bg::after` y `.av-noise`.
+- `GamePlayer` pone `data-player` en `<html>`; `app/styles/background.css` apaga bajo `html[data-player]` la rejilla animada `.av-bg::before` y oculta `.av-bg::after` y `.av-noise`.
 - `.crt-screen::after` sin `mix-blend-mode`.
 - HUD en refs + `paintHud` (`textContent` solo si cambia); `handleHud`/`handleGameOver` con `useCallback`; los 5 Canvas usan "callbacks en refs".
 - Cuello de botella original: la GPU (7–14 ms/frame), no Paint/Raster (≈0.6 ms).
@@ -30,7 +30,7 @@ Sembrada el 2026-10-27 con los resultados del spec 14 (`specs/14-performance-efe
 ## Riesgos abiertos
 
 - **RANARIA `neon`**: 44.2 fps escritorio (0.8 por debajo del objetivo de 45) y 14.7 fps móvil. Las capas de página no lo arreglan. Pendiente un spec de glow (límite de `shadowBlur` o glow prerenderizado en offscreen); decisión del usuario sobre cuánto aspecto ceder.
-- **CAÍDA sin skins** (`lib/games/tetris/` sin `skins.ts`): se mide solo su aspecto único; las skins las crea `skin-designer`.
+- **CAÍDA sin skins** (`lib/games/caida/` sin `skins.ts`): se mide solo su aspecto único; las skins las crea `skin-designer`.
 - Medido solo en emulación: falta prueba en móvil real y con sesión iniciada.
 
 ## Método de medición
@@ -58,5 +58,5 @@ Sembrada el 2026-10-27 con los resultados del spec 14 (`specs/14-performance-efe
 
 ## Notas de la auditoría de rocas (2026-10-27, solo auditoría)
 
-- dpr sin acotar (`asteroids/engine.ts:253`), rejilla de `neon` repintada por frame (`:319`), sin caché de fondo; riesgo bajo, sin spec propuesto (cumple presupuesto).
+- dpr sin acotar (`rocas/engine.ts:253`), rejilla de `neon` repintada por frame (`:319`), sin caché de fondo; riesgo bajo, sin spec propuesto (cumple presupuesto).
 - Entorno: el dev server de :3000 devolvía 500 (Jest worker) con 5 agentes concurrentes; se midió contra un `next start` ajeno (:3107). El scratchpad es compartido: usar nombres de script propios (`rocas-measure.js`), otro agente sobrescribió `m.js`.

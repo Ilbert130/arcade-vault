@@ -19,7 +19,7 @@ Responde en el idioma del usuario; títulos y textos de UI de los juegos van en 
 2. **Lee el estado real del proyecto**:
    - `references/implemented-games/implemented-games.md` — juegos jugables hoy.
    - `supabase/migrations/*games_scores.sql` — catálogo sembrado (ids, `cat`, `color`, `cover`, `sort_order`) y `supabase/migrations/*_playable.sql` — cuáles se activaron.
-   - `lib/data.ts` (`CATS`) y las clases `.cover-*` de `app/globals.css`.
+   - `lib/catalog/categories.ts` (`CATS`) y las clases `.cover-*` de `app/styles/covers.css`.
    - `references/started-games/` si existe (juegos vanilla JS listos para portar → menor esfuerzo).
    - `.claude/skills/add-game/references/engine-contract.md` si necesitas confirmar el contrato del motor.
 3. **Concilia**: si una sugerencia de la memoria ya está jugable, márcala `implementado`. Si el catálogo cambió, actualiza la sección de estado.

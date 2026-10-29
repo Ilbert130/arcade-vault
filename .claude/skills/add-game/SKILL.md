@@ -12,7 +12,7 @@ Responde en el idioma del usuario; el texto de UI del proyecto va en español.
 
 ## Convenciones de nombres
 
-- `<slug>` es siempre el `id` del juego en `public.games` (p. ej. `caida`, `bloque-buster`, `serpentina`), no el nombre del juego original (`tetris`, `arkanoid`). Así carpeta, assets, migración y URL coinciden y el siguiente agente encuentra todo con el mismo nombre. Excepción: `lib/games/asteroids/` ya existe para `rocas`; no la renombres.
+- `<slug>` es siempre el `id` del juego en `public.games` (p. ej. `caida`, `bloque-buster`, `serpentina`), no el nombre del juego original (`tetris`, `arkanoid`). Así carpeta, assets, migración y URL coinciden y el siguiente agente encuentra todo con el mismo nombre. Sin excepciones: `lib/games/rocas/` y `lib/games/caida/` ya siguen la convención.
 - Componente: `<Name>Canvas.tsx` con `<Name>` en PascalCase del `id` (`CaidaCanvas`, `BloqueBusterCanvas`); clase CSS `.<slug>-canvas`.
 - Registry: `components/games/registry.tsx` (con `x`, porque guarda referencias a componentes). Si ya existe como `.ts`, déjalo como está.
 - Clases del overlay de inicio genéricas: `.game-start*` (no `.rocas-start*`).
@@ -21,7 +21,7 @@ Responde en el idioma del usuario; el texto de UI del proyecto va en español.
 
 1. Lee `CLAUDE.md`/`AGENTS.md`. Luego **abre y lee** (no basta con listar la carpeta) las guías de `node_modules/next/dist/docs/` que toquen lo que vas a escribir: como mínimo Client Components / `"use client"` y public assets si el juego los usa. Next 16.3.3 difiere de lo que sabes y el proyecto lo exige.
 2. Lee `specs/05-asteroides-rocas.md` y `specs/06-leaderboard-tabla-juegos.md` solo si necesitas el detalle; el resumen operativo está en `references/`.
-3. **Invoca el skill `/frontend-design` (herramienta Skill, `frontend-design`) antes de escribir el CSS y los overlays del juego.** Es una regla del proyecto, no opcional: el overlay de inicio, los controles y el estilo del canvas se diseñan con él, partiendo de los tokens y clases CRT existentes en `globals.css`. Si el entorno no permite invocar skills, dilo en el resumen final en lugar de omitirlo en silencio.
+3. **Invoca el skill `/frontend-design` (herramienta Skill, `frontend-design`) antes de escribir el CSS y los overlays del juego.** Es una regla del proyecto, no opcional: el overlay de inicio, los controles y el estilo del canvas se diseñan con él, partiendo de los tokens y clases CRT existentes en `app/styles/` (tokens en `base.css`). Si el entorno no permite invocar skills, dilo en el resumen final en lugar de omitirlo en silencio.
 4. Un hook ejecuta Prettier+ESLint en cada edición: arregla lo que reporte (p. ej. el lint de React Compiler rechaza algunos `useCallback`; si lo quitas, comprueba que el comportamiento no cambia).
 
 ## Flujo
@@ -38,7 +38,7 @@ Crea `specs/NN-slug.md` (NN = siguiente número libre; `ls specs/`) con `assets/
 
 ### 3. Prerrequisito: registry en GamePlayer
 
-`components/GamePlayer.tsx` nació hard-coded a ROCAS (`isRocas`). Si todavía existe esa bandera, haz **primero y por separado** el refactor descrito en `references/game-registry.md` (ROCAS pasa a ser una entrada, sin cambios de comportamiento; verifica que sigue funcionando). Si el registry ya existe, solo agrega una entrada.
+`components/player/GamePlayer.tsx` nació hard-coded a ROCAS (`isRocas`). Si todavía existe esa bandera, haz **primero y por separado** el refactor descrito en `references/game-registry.md` (ROCAS pasa a ser una entrada, sin cambios de comportamiento; verifica que sigue funcionando). Si el registry ya existe, solo agrega una entrada.
 
 ### 4. Motor
 
@@ -46,11 +46,11 @@ Crea `specs/NN-slug.md` (NN = siguiente número libre; `ls specs/`) con `assets/
 
 ### 5. Componente canvas
 
-`components/games/<Name>Canvas.tsx` copiando el patrón de `AsteroidsCanvas.tsx`: motor creado una vez en `useEffect([])`, callbacks por refs, `status` → `start/pause/resume/reset`, `destroy()` en el cleanup.
+`components/games/<Name>Canvas.tsx` copiando `RocasCanvas.tsx`: unas líneas que llaman a `useGameCanvas(createXGame, props)` (`components/games/useGameCanvas.ts`), que ya crea el motor una vez, usa callbacks por refs, aplica la skin, traduce `status` → `start/pause/resume/reset` y llama a `destroy()` en el cleanup.
 
 ### 6. Integración visual
 
-Entrada en el registry, CSS del juego junto al bloque ROCAS de `app/globals.css` (canvas 4:3, overlay de inicio, controles), `.cover-*` nueva solo si el `cover` es nuevo. Usa `/frontend-design` y los tokens CSS existentes (neón, CRT).
+Entrada en el registry, CSS del juego en `app/styles/games.css`, junto al bloque ROCAS (canvas 4:3, overlay de inicio, controles), `.cover-*` nueva solo si el `cover` es nuevo. Usa `/frontend-design` y los tokens CSS existentes (neón, CRT).
 
 ### 7. Leaderboard
 

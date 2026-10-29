@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Agrega Tetris (references/started-games/03-tetris) a la plataforma como el juego 'caida', jugable y con leaderboard.",
-      "expected_output": "Spec NN creado; motor TS en lib/games/tetris; TetrisCanvas; entrada en registry con HUD score/lines/level; migración playable=true para caida; build y lint verdes.",
+      "expected_output": "Spec NN creado; motor TS en lib/games/caida; CaidaCanvas; entrada en registry con HUD score/lines/level; migración playable=true para caida; build y lint verdes.",
       "files": []
     },
     {
