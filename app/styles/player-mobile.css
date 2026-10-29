@@ -1,0 +1,285 @@
+/* Botones del HUD: en pantallas estrechas quedan en su icono (el texto sigue en aria-label). */
+.hud-btn-icon {
+  display: none;
+}
+@media (pointer: coarse) {
+  /* Las pistas de teclado no aplican en táctil. */
+  .crt-controls {
+    display: none;
+  }
+  /* Tabletas: carcasa única bajo el CRT, cruceta a la izquierda y A/B a la derecha. */
+  .touch-pad {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 14px;
+    padding: calc(var(--key) * 0.25) calc(var(--key) * 0.3);
+  }
+}
+/* ── Móvil (táctil con ≤ 720 px de ancho o ≤ 560 px de alto): la pantalla de juego
+   ocupa exactamente el alto visible, sin pie de página ni scroll. ── */
+@media (pointer: coarse) and (max-width: 720px),
+  (pointer: coarse) and (max-height: 560px) {
+  #root:has(.av-player) {
+    height: 100dvh;
+  }
+  #root:has(.av-player) > footer {
+    display: none;
+  }
+  .av-main:has(.av-player) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .av-player {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+  /* HUD en una sola fila; tipografía que escala con el ancho. */
+  .player-hud {
+    flex-wrap: nowrap;
+    gap: clamp(6px, 2vw, 14px);
+    padding: clamp(5px, 1.4vw, 8px) clamp(8px, 2.4vw, 12px);
+    margin-bottom: clamp(5px, 1.4vw, 8px);
+  }
+  .player-hud > div:first-child {
+    flex-wrap: nowrap !important;
+    gap: clamp(8px, 3vw, 18px) !important;
+    min-width: 0;
+  }
+  .hud-stat {
+    gap: 2px;
+    min-width: 0;
+  }
+  .hud-stat .l {
+    font-size: clamp(6px, 1.9vw, 8px);
+    letter-spacing: 0.1em;
+  }
+  .hud-stat .v {
+    font-size: clamp(9px, 3vw, 13px);
+    white-space: nowrap;
+  }
+  .hud-actions {
+    flex: none;
+    gap: clamp(4px, 1.4vw, 8px);
+  }
+  .hud-actions .btn {
+    padding: clamp(6px, 1.8vw, 9px) clamp(7px, 2.2vw, 11px);
+    font-size: clamp(7px, 2vw, 9px);
+    letter-spacing: 0.1em;
+  }
+  /* Selector de aspecto: una sola fila sin etiqueta, repartida a todo el ancho. */
+  .skin-switch {
+    margin: 0 0 clamp(5px, 1.4vw, 8px);
+  }
+  .skin-switch-label {
+    display: none;
+  }
+  .skin-switch-group {
+    flex: 1;
+  }
+  .skin-opt {
+    flex: 1;
+    justify-content: center;
+    gap: 5px;
+    padding: clamp(5px, 1.6vw, 8px) 4px;
+    font-size: clamp(7px, 2vw, 9px);
+    letter-spacing: 0.08em;
+  }
+  .crt-bottom {
+    display: none;
+  }
+}
+/* Vertical: CRT a todo el ancho y el mando llena el resto del alto; sus teclas crecen
+   con ese espacio (container queries) en vez de saltar entre tamaños fijos. */
+@media (pointer: coarse) and (max-width: 720px) and (orientation: portrait) {
+  .av-player {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(6px, 2vw, 10px) clamp(6px, 2.5vw, 12px)
+      clamp(8px, 2.5vw, 12px);
+  }
+  .player-stage {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    container-type: size;
+    /* Tecla = lo menor entre lo que cabe en ancho (cruceta + B/A lado a lado ≈ 6,5
+       teclas; 34 px = padding, borde y hueco) y en el alto que deja el CRT a todo el
+       ancho (cruceta = 3,12 teclas; 36 px = padding del CRT, padding/borde/margen del
+       mando), entre 40 px (mínimo cómodo) y 96 px. Si no llega a 40 px, cede el CRT. */
+    --key-fit: clamp(
+      40px,
+      min(
+        (100cqw - 34px) / 6.5,
+        (100cqh - (100cqw - 12px) * 0.75 - 36px) / 3.12
+      ),
+      96px
+    );
+    /* Alto del mando: cruceta + padding y borde + su margen superior. */
+    --pad-h: calc(var(--key-fit) * 3.12 + 24px);
+  }
+  /* Ancho completo salvo en móviles bajos: ahí el CRT cede para que el mando quepa. */
+  .crt {
+    flex: none;
+    align-self: center;
+    width: min(100cqw, calc((100cqh - var(--pad-h) - 12px) * 4 / 3 + 12px));
+    padding: 6px;
+    border-radius: 14px;
+  }
+  /* Carcasa única a todo el ancho bajo el CRT, ajustada a las teclas (padding mínimo). */
+  .touch-pad {
+    flex: none;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 8px 12px;
+    --pad-radius: 16px;
+    /* Se resuelve contra el escenario (container query). */
+    --key: var(--key-fit);
+  }
+  /* El título de inicio se mide por el ancho del escenario: SERPENTINA cabe en el CRT. */
+  .game-start-title {
+    font-size: clamp(18px, calc((100cqw - 40px) / 11.5), 56px);
+  }
+}
+/* Horizontal: dos medias carcasas (grips), la cruceta a la izquierda y A/B a la derecha,
+   con el CRT al centro a todo el alto. */
+@media (pointer: coarse) and (orientation: landscape) and (max-height: 560px) {
+  .av-nav {
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+  .av-player {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: 14px;
+    padding: 6px 12px 8px;
+  }
+  /* En horizontal manda el alto: HUD y botones más bajos para dárselo al CRT. */
+  .player-hud {
+    grid-column: 1 / -1;
+    padding: 3px 10px;
+  }
+  .hud-actions .btn {
+    padding: 5px 8px;
+  }
+  .hud-stat {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 6px;
+  }
+  /* El selector de aspecto sube a la columna de la cruceta, encima de ella, apilado
+     para no ensanchar la columna. */
+  .skin-switch {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .skin-switch-group {
+    flex-direction: column;
+  }
+  .skin-opt {
+    justify-content: flex-start;
+    padding: 5px 8px;
+    border-left: 0;
+    border-top: 1px solid var(--line-2);
+  }
+  .skin-opt:first-child {
+    border-top: 0;
+  }
+  /* Escenario y mando se abren: CRT y medias carcasas son celdas de la rejilla del
+     reproductor. El mando deja de pintar su carcasa; la pinta cada media carcasa. */
+  .player-stage,
+  .touch-pad {
+    display: contents;
+  }
+  .touch-pad::before,
+  .touch-pad::after {
+    content: none;
+  }
+  /* Tecla = lo menor entre el 15 % del alto y lo que deja libre el CRT a cada lado
+     (≈ 3,4 teclas por media carcasa); 104 px ≈ barra + HUD + márgenes. */
+  .touch-pad {
+    --key: clamp(
+      40px,
+      min(15dvh, (100vw - 52px - (100dvh - 104px) * 4 / 3) / 6.9 - 2px),
+      68px
+    );
+    --pad-radius: calc(var(--key) * 0.36);
+  }
+  .touch-shell {
+    display: flex;
+    padding: calc(var(--key) * 0.14);
+    place-self: center;
+  }
+  .touch-shell::before,
+  .touch-shell::after {
+    content: "";
+  }
+  .touch-shell--dpad {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  .touch-shell--actions {
+    grid-column: 3;
+    grid-row: 2 / 4;
+  }
+  /* El CRT llena el alto, salvo en móviles cortos de ancho: ahí cede lo justo para que
+     las medias carcasas no bajen de teclas de 40 px. */
+  .crt {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    align-self: center;
+    height: min(100%, calc((100vw - 342px) * 0.75));
+    aspect-ratio: 4 / 3;
+    padding: 6px 8px;
+    border-radius: 16px;
+  }
+  /* El título de la pantalla de inicio se mide por el alto del CRT, no por el ancho de la ventana. */
+  .game-start-title {
+    font-size: clamp(18px, 9dvh, 48px);
+  }
+}
+/* Estrecho (≤ 480 px de ancho, o de alto en horizontal): se oculta JUGADOR (sale en el
+   modal final) y los botones del HUD quedan en su icono. */
+@media (pointer: coarse) and (max-width: 480px),
+  (pointer: coarse) and (max-height: 480px) {
+  .player-hud > div:first-child > .hud-stat:first-child {
+    display: none;
+  }
+  .hud-btn-icon {
+    display: inline;
+  }
+  .hud-btn-text {
+    display: none;
+  }
+  .hud-actions .btn {
+    min-width: 34px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .touch-btn,
+  .touch-btn-arrow,
+  .touch-btn-ring {
+    transition: none;
+  }
+  .touch-dpad-gem {
+    animation: none;
+  }
+  /* Reproductor: la simulación decorativa y el aviso de guardado quedan quietos. */
+  html[data-player] .game-arena .grid-floor,
+  html[data-player] .game-arena .player-ship,
+  html[data-player] .game-arena .enemy {
+    animation: none;
+  }
+  html[data-player] .toast-saved {
+    animation: none;
+    width: auto;
+  }
+}

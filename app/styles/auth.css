@@ -1,0 +1,138 @@
+/* ===== auth ===== */
+.av-auth-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+}
+.auth-card {
+  width: min(440px, 100%);
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  padding: 28px;
+  position: relative;
+  box-shadow: 0 0 30px rgba(0, 245, 255, 0.18);
+}
+.auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  pointer-events: none;
+  border: 1px dashed rgba(0, 245, 255, 0.18);
+}
+.auth-header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+.auth-header .mark {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  background:
+    linear-gradient(45deg, var(--magenta) 0 50%, transparent 50%),
+    linear-gradient(-45deg, var(--cyan) 0 50%, transparent 50%);
+  background-blend-mode: screen;
+  box-shadow:
+    0 0 16px rgba(0, 245, 255, 0.55),
+    inset 0 0 8px rgba(255, 0, 110, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.auth-header h2 {
+  margin: 4px 0 0;
+  font-family: var(--pixel);
+  font-size: 16px;
+  letter-spacing: 0.1em;
+}
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  margin: 18px 0;
+  border: 1px solid var(--line);
+}
+.auth-tabs button {
+  padding: 12px;
+  font-family: var(--pixel);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  background: transparent;
+  border: 0;
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+.auth-tabs button.on {
+  background: rgba(0, 245, 255, 0.08);
+  color: var(--cyan);
+  text-shadow: 0 0 6px rgba(0, 245, 255, 0.5);
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.field label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+.field input {
+  height: 44px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 0 12px;
+  outline: 0;
+  font-family: var(--mono);
+  transition:
+    border-color 140ms,
+    box-shadow 140ms;
+}
+.field input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.35);
+}
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+  font-family: var(--pixel);
+  font-size: 8px;
+  color: var(--ink-faint);
+  letter-spacing: 0.16em;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.auth-error {
+  margin: 4px 0 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--magenta);
+  border-left-width: 3px;
+  background: rgba(255, 0, 110, 0.08);
+  color: var(--magenta);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.auth-card .btn:disabled,
+.auth-tabs button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+  box-shadow: none;
+}
+.social {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.social .btn {
+  padding: 12px;
+  font-size: 9px;
+}

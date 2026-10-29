@@ -1,0 +1,204 @@
+/* ===== hero / library ===== */
+.av-hero {
+  padding: 64px 32px 32px;
+  max-width: 1320px;
+  margin: 0 auto;
+  text-align: center;
+}
+.av-hero h1 {
+  font-family: var(--pixel);
+  font-size: clamp(28px, 6vw, 64px);
+  letter-spacing: 0.06em;
+  margin: 0;
+  background: linear-gradient(
+    180deg,
+    #fff 0%,
+    var(--cyan) 60%,
+    var(--magenta) 110%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.4));
+}
+.av-hero .sub {
+  margin-top: 18px;
+  font-family: var(--pixel);
+  font-size: clamp(10px, 1.6vw, 14px);
+  letter-spacing: 0.2em;
+  color: var(--yellow);
+}
+.av-hero .sub .blink {
+  animation: blink 1.2s steps(1, end) infinite;
+}
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.av-filters {
+  display: flex;
+  gap: 12px;
+  max-width: 1320px;
+  margin: 32px auto 0;
+  padding: 0 32px;
+  flex-wrap: wrap;
+}
+.av-search {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 48px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  position: relative;
+}
+.av-search:focus-within {
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(0, 245, 255, 0.35);
+}
+.av-search input {
+  flex: 1;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+.av-search input::placeholder {
+  color: var(--ink-faint);
+}
+.av-search .ico {
+  color: var(--cyan);
+  font-family: var(--pixel);
+  font-size: 11px;
+}
+.av-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 12px 14px;
+  font-family: var(--pixel);
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+  cursor: pointer;
+}
+.chip.active {
+  color: var(--magenta);
+  border-color: var(--magenta);
+  box-shadow: 0 0 10px rgba(255, 0, 110, 0.35);
+}
+.chip:hover:not(.active) {
+  color: var(--ink);
+}
+/* ===== grid + cards ===== */
+.av-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 22px;
+  max-width: 1320px;
+  margin: 32px auto 80px;
+  padding: 0 32px;
+}
+.card {
+  position: relative;
+  background: linear-gradient(180deg, var(--bg-2), var(--bg-3));
+  border: 1px solid var(--line);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, transparent 60%, rgba(0, 245, 255, 0.4));
+  opacity: 0;
+  transition: opacity 180ms;
+  pointer-events: none;
+}
+.card:hover {
+  transform: translateY(-6px) rotateX(2deg) rotateY(-2deg);
+  border-color: var(--cyan);
+  box-shadow:
+    0 18px 40px -10px rgba(0, 245, 255, 0.4),
+    0 0 0 1px rgba(0, 245, 255, 0.3);
+}
+.card:hover::before {
+  opacity: 0.5;
+}
+.card .cover {
+  aspect-ratio: 4 / 3;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-2);
+}
+.card .cover .label {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  font-family: var(--pixel);
+  font-size: 8px;
+  padding: 4px 6px;
+  background: rgba(0, 0, 0, 0.6);
+  color: var(--cyan);
+  border: 1px solid var(--line);
+  z-index: 2;
+}
+.card .meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.card .title {
+  font-family: var(--pixel);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+.card .desc {
+  font-size: 12px;
+  color: var(--ink-dim);
+  min-height: 36px;
+}
+.card .row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+.score-badge {
+  display: flex;
+  flex-direction: column;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.score-badge b {
+  font-family: var(--pixel);
+  font-size: 12px;
+  color: var(--yellow);
+  letter-spacing: 0.06em;
+  text-shadow: 0 0 6px rgba(245, 255, 0, 0.6);
+}

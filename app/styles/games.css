@@ -1,0 +1,100 @@
+/* ===== ROCAS (juego de asteroides real) ===== */
+.rocas-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+/* ===== CAÍDA (Tetris real) ===== */
+.caida-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+/* ===== BLOQUE BUSTER (Arkanoid real) ===== */
+.bloque-buster-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  cursor: none;
+}
+/* ===== SERPENTINA (Snake real) ===== */
+/* Campo en fósforo verde: un filete interior marca los límites de la rejilla (el outline pinta sobre el canvas; un box-shadow inset quedaría tapado). */
+.serpentina-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  outline: 1px solid rgba(0, 255, 136, 0.35);
+  outline-offset: -1px;
+}
+/* ===== RANARIA (Frogger real) ===== */
+/* Tablero vertical centrado en el mundo 4:3: los márgenes negros alojan el HUD; el filete verde marca el mapa. */
+.ranaria-canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  outline: 1px solid rgba(93, 255, 122, 0.3);
+  outline-offset: -1px;
+}
+/* Pantalla de atracción de ROCAS, CAÍDA y BLOQUE BUSTER: el campo del juego se ve tenue detrás. */
+.game-start {
+  z-index: 5;
+  background: radial-gradient(
+    60% 55% at 50% 50%,
+    rgba(0, 0, 0, 0.82),
+    rgba(0, 0, 0, 0.45) 100%
+  );
+}
+.game-start-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 3.2vw, 26px);
+  padding: 0 16px;
+}
+/* Haz desalineado del CRT: el título se separa en cyan y magenta. */
+.game-start-title {
+  font-size: clamp(30px, 7.5vw, 64px);
+  letter-spacing: 0.12em;
+  color: var(--ink);
+  text-shadow:
+    -3px 0 0 var(--cyan),
+    3px 0 0 var(--magenta),
+    0 0 24px rgba(255, 0, 110, 0.45);
+}
+.game-start-prompt {
+  font-size: clamp(9px, 1.5vw, 13px);
+  letter-spacing: 0.14em;
+  color: var(--yellow);
+  text-shadow: 0 0 8px rgba(245, 255, 0, 0.6);
+  animation: blink 1.1s steps(1, end) infinite;
+}
+.crt-controls {
+  color: var(--ink-dim);
+  text-align: right;
+}
+@media (max-width: 720px) {
+  .crt-bottom:has(.crt-controls) {
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-start-prompt {
+    animation: none;
+  }
+}
