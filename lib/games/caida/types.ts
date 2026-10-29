@@ -1,3 +1,4 @@
+import type { SkinId } from "@/lib/games/platform/skins";
 export type CaidaHud = {
   score: number;
   lines: number;
@@ -15,6 +16,7 @@ export type CaidaGame = {
   resume: () => void; // continúa; reinicia el reloj de dt
   reset: () => void; // estado inicial (score 0, lines 0, level 1) sin arrancar
   destroy: () => void; // cancela rAF y elimina listeners de teclado
+  setSkin: (id: SkinId) => void; // cambia la skin (solo cosmética) y redibuja el frame actual
   press: (action: string) => void; // = keydown de la acción; desconocidas se ignoran
   release: (action: string) => void; // = keyup de la acción
   releaseAll: () => void; // suelta todas las acciones mantenidas

@@ -1,11 +1,5 @@
-import {
-  COLORS,
-  COLS,
-  KICKS,
-  LINE_SCORES,
-  PIECE_TYPES,
-  ROWS,
-} from "./constants";
+import { COLS, KICKS, LINE_SCORES, PIECE_TYPES, ROWS } from "./constants";
+import type { BlockPattern, CaidaSkin } from "./skins";
 import type { Board, Matrix, Piece } from "./types";
 // ── Piezas (índice = tipo; 0 = vacío): I, O, T, S, Z, J, L y N («tuerca») ─────
 const PIECES: readonly (Matrix | null)[] = [
@@ -134,21 +128,114 @@ export const ghostY = (board: Board, piece: Piece): number => {
   return gy;
 };
 // ── Dibujo ────────────────────────────────────────────────────────────────────
+/** Bloques neón ya renderizados (con glow) por color+tamaño+dpr: shadowBlur una sola vez. */
+export type BlockCache = Map<string, HTMLCanvasElement>;
+const glowPad = (skin: CaidaSkin) => Math.ceil(skin.blockGlow * 1.5);
+const glowSprite = (
+  cache: BlockCache,
+  skin: CaidaSkin,
+  color: string,
+  size: number,
+  dpr: number,
+): HTMLCanvasElement => {
+  const key = `${color}|${size}|${dpr}|${skin.blockGlow}|${skin.core}`;
+  const cached = cache.get(key);
+  if (cached) return cached;
+  const pad = glowPad(skin);
+  const full = size + pad * 2;
+  const sprite = document.createElement("canvas");
+  sprite.width = Math.ceil(full * dpr);
+  sprite.height = Math.ceil(full * dpr);
+  const g = sprite.getContext("2d");
+  if (g) {
+    g.scale(dpr, dpr);
+    g.translate(pad, pad);
+    // Relleno tenue del color: el bloque se lee como "tubo" hueco.
+    g.globalAlpha = 0.18;
+    g.fillStyle = color;
+    g.fillRect(2, 2, size - 4, size - 4);
+    g.globalAlpha = 1;
+    // Trazo de color con glow (doble pasada para intensificar) + núcleo fino.
+    g.strokeStyle = color;
+    g.lineWidth = 1.5;
+    g.shadowColor = color;
+    g.shadowBlur = skin.blockGlow * dpr; // shadowBlur no escala con la transformación
+    g.strokeRect(2.75, 2.75, size - 5.5, size - 5.5);
+    g.strokeRect(2.75, 2.75, size - 5.5, size - 5.5);
+    g.shadowBlur = 0;
+    if (skin.core) {
+      g.strokeStyle = skin.core;
+      g.lineWidth = 0.75;
+      g.strokeRect(2.75, 2.75, size - 5.5, size - 5.5);
+    }
+  }
+  cache.set(key, sprite);
+  return sprite;
+};
+/** Patrón retro dibujado con el color de fondo sobre el bloque relleno. */
+const drawPattern = (
+  ctx: CanvasRenderingContext2D,
+  pattern: BlockPattern,
+  px: number,
+  py: number,
+  size: number,
+  ink: string,
+): void => {
+  ctx.fillStyle = ink;
+  switch (pattern) {
+    case "dot": {
+      const s = Math.round(size * 0.3);
+      const o = Math.floor((size - s) / 2);
+      ctx.fillRect(px + o, py + o, s, s);
+      break;
+    }
+    case "stripes": {
+      const step = Math.round(size / 4);
+      for (let k = 1; k <= 3; k++)
+        ctx.fillRect(px + 1, py + k * step - 1, size - 2, 2);
+      break;
+    }
+    case "frame":
+      ctx.fillRect(px + 5, py + 5, size - 10, size - 10);
+      break;
+    case "solid":
+      break;
+  }
+};
 /** Dibuja un bloque con su esquina superior izquierda en (px, py) del mundo lógico. */
 export const drawBlock = (
   ctx: CanvasRenderingContext2D,
+  skin: CaidaSkin,
+  cache: BlockCache,
   px: number,
   py: number,
   colorIndex: number,
   size: number,
   alpha = 1,
 ): void => {
-  const color = COLORS[colorIndex];
+  const color = skin.colors[colorIndex];
   if (!color) return;
   ctx.globalAlpha = alpha;
-  ctx.fillStyle = color;
-  ctx.fillRect(px + 1, py + 1, size - 2, size - 2);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
-  ctx.fillRect(px + 1, py + 1, size - 2, 4);
+  if (skin.blockStyle === "glow") {
+    const dpr = ctx.getTransform().a || 1;
+    const pad = glowPad(skin);
+    ctx.drawImage(
+      glowSprite(cache, skin, color, size, dpr),
+      px - pad,
+      py - pad,
+      size + pad * 2,
+      size + pad * 2,
+    );
+  } else {
+    ctx.fillStyle = color;
+    ctx.fillRect(px + 1, py + 1, size - 2, size - 2);
+    if (skin.blockShine) {
+      ctx.fillStyle = skin.blockShine;
+      ctx.fillRect(px + 1, py + 1, size - 2, 4);
+    }
+    const pattern = skin.patterns?.[colorIndex];
+    if (skin.blockStyle === "pattern" && pattern)
+      drawPattern(ctx, pattern, px, py, size, skin.bg);
+  }
   ctx.globalAlpha = 1;
 };

@@ -6,8 +6,6 @@ import {
   BOARD_X,
   BOARD_Y,
   COLS,
-  GHOST_ALPHA,
-  GLOW,
   H,
   HARD_DROP_POINTS,
   LEFT_PANEL_W,
@@ -18,7 +16,6 @@ import {
   MIN_DROP_MS,
   NEXT_BLOCK,
   NEXT_BOX,
-  PALETTE,
   RIGHT_PANEL_W,
   RIGHT_PANEL_X,
   ROWS,
@@ -35,7 +32,10 @@ import {
   merge,
   randomPiece,
   tryRotate,
+  type BlockCache,
 } from "./entities";
+import { SKINS, type CaidaSkin } from "./skins";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/games/platform/skins";
 import type {
   Board,
   Piece,
@@ -69,6 +69,7 @@ const dropIntervalMs = (level: number) =>
 export function createCaidaGame(
   canvas: HTMLCanvasElement,
   callbacks: CaidaCallbacks,
+  skinId: SkinId = DEFAULT_SKIN,
 ): CaidaGame {
   const ctxOrNull = canvas.getContext("2d");
   if (!ctxOrNull) throw new Error("Canvas 2D no disponible");
@@ -91,6 +92,9 @@ export function createCaidaGame(
   let listening = false;
   let gameOverEmitted = false;
   let lastHud: CaidaHud | null = null;
+  // ── Skin (solo cosmética) ───────────────────────────────────────────────────
+  let skin: CaidaSkin = SKINS[skinId] ?? SKINS[DEFAULT_SKIN];
+  const blockCache: BlockCache = new Map();
   // ── HUD hacia React ─────────────────────────────────────────────────────────
   function emitHud() {
     if (
@@ -202,8 +206,8 @@ export function createCaidaGame(
     canvas.height = Math.round(H * dpr);
   }
   function drawGrid() {
-    ctx.strokeStyle = PALETTE.line;
-    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = skin.grid;
+    ctx.lineWidth = skin.gridWidth;
     ctx.beginPath();
     for (let c = 1; c < COLS; c++) {
       ctx.moveTo(BOARD_X + c * BLOCK, BOARD_Y);
@@ -220,6 +224,8 @@ export function createCaidaGame(
       for (let c = 0; c < piece.shape[r].length; c++)
         drawBlock(
           ctx,
+          skin,
+          blockCache,
           BOARD_X + (piece.x + c) * BLOCK,
           BOARD_Y + (y + r) * BLOCK,
           piece.shape[r][c],
@@ -232,12 +238,12 @@ export function createCaidaGame(
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
     ctx.font = `12px ${font}`;
-    ctx.fillStyle = PALETTE.inkDim;
+    ctx.fillStyle = skin.inkDim;
     ctx.fillText(label, LEFT_PANEL_X, y);
     ctx.font = `bold 26px ${font}`;
     ctx.fillStyle = color;
     ctx.shadowColor = color;
-    ctx.shadowBlur = GLOW;
+    ctx.shadowBlur = skin.glow;
     ctx.fillText(value, LEFT_PANEL_X, y + 32, LEFT_PANEL_W);
     ctx.restore();
   }
@@ -249,9 +255,9 @@ export function createCaidaGame(
     ctx.textAlign = "left";
     ctx.textBaseline = "alphabetic";
     ctx.font = `12px ${font}`;
-    ctx.fillStyle = PALETTE.inkDim;
+    ctx.fillStyle = skin.inkDim;
     ctx.fillText("SIGUIENTE", RIGHT_PANEL_X, 40);
-    ctx.strokeStyle = PALETTE.line;
+    ctx.strokeStyle = skin.line;
     ctx.lineWidth = 1;
     ctx.strokeRect(bx + 0.5, by + 0.5, box - 1, box - 1);
     ctx.restore();
@@ -262,6 +268,8 @@ export function createCaidaGame(
       for (let c = 0; c < next.shape[r].length; c++)
         drawBlock(
           ctx,
+          skin,
+          blockCache,
           bx + (offX + c) * NEXT_BLOCK,
           by + (offY + r) * NEXT_BLOCK,
           next.shape[r][c],
@@ -271,34 +279,45 @@ export function createCaidaGame(
   function draw() {
     syncResolution();
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = PALETTE.bg;
+    ctx.fillStyle = skin.bg;
     ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "rgba(0, 245, 255, 0.03)";
-    ctx.fillRect(BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
+    if (skin.boardTint) {
+      ctx.fillStyle = skin.boardTint;
+      ctx.fillRect(BOARD_X, BOARD_Y, BOARD_W, BOARD_H);
+    }
     drawGrid();
     for (let r = 0; r < ROWS; r++)
       for (let c = 0; c < COLS; c++)
         drawBlock(
           ctx,
+          skin,
+          blockCache,
           BOARD_X + c * BLOCK,
           BOARD_Y + r * BLOCK,
           board[r][c],
           BLOCK,
         );
     if (current) {
-      drawPiece(current, ghostY(board, current), GHOST_ALPHA);
+      drawPiece(current, ghostY(board, current), skin.ghostAlpha);
       drawPiece(current, current.y);
     }
     ctx.save();
-    ctx.strokeStyle = PALETTE.cyan;
-    ctx.shadowColor = PALETTE.cyan;
-    ctx.shadowBlur = GLOW;
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = skin.cyan;
+    ctx.shadowColor = skin.cyan;
+    ctx.shadowBlur = skin.glow;
+    ctx.lineWidth = skin.borderWidth;
     ctx.strokeRect(BOARD_X - 1, BOARD_Y, BOARD_W + 2, BOARD_H);
+    if (skin.core) {
+      // Neón: núcleo fino sobre el trazo de color.
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = skin.core;
+      ctx.lineWidth = 0.75;
+      ctx.strokeRect(BOARD_X - 1, BOARD_Y, BOARD_W + 2, BOARD_H);
+    }
     ctx.restore();
-    drawStat("PUNTUACIÓN", score.toLocaleString("es-ES"), 40, PALETTE.ink);
-    drawStat("LÍNEAS", String(lines), 130, PALETTE.green);
-    drawStat("NIVEL", String(level), 220, PALETTE.yellow);
+    drawStat("PUNTUACIÓN", score.toLocaleString("es-ES"), 40, skin.ink);
+    drawStat("LÍNEAS", String(lines), 130, skin.green);
+    drawStat("NIVEL", String(level), 220, skin.yellow);
     drawNext();
   }
   // ── Bucle ───────────────────────────────────────────────────────────────────
@@ -354,6 +373,11 @@ export function createCaidaGame(
       resetState();
       phase = "idle";
       emitHud();
+      draw();
+    },
+    setSkin(id) {
+      skin = SKINS[id] ?? SKINS[DEFAULT_SKIN];
+      // Redibuja ya: en "idle"/"gameover" no hay bucle y en pausa se ve el cambio al instante.
       draw();
     },
     destroy() {

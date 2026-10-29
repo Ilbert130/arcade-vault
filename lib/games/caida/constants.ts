@@ -31,28 +31,4 @@ export const MIN_DROP_MS = 100;
 /** Desplazamientos horizontales probados al rotar, en orden. */
 export const KICKS = [0, -1, 1, -2, 2] as const;
 export const PIECE_TYPES = 8;
-// ── Paleta neón (tokens de app/globals.css; T y J no tienen token propio) ─────
-export const PALETTE = {
-  bg: "#000000",
-  ink: "#e6e9ff", // --ink
-  inkDim: "#8a8fb5", // --ink-dim
-  cyan: "#00f5ff", // --cyan
-  magenta: "#ff006e", // --magenta
-  yellow: "#f5ff00", // --yellow
-  green: "#00ff88", // --green
-  line: "rgba(0, 245, 255, 0.18)", // --line
-} as const;
-/** Color por tipo de pieza (índice 0 = vacío): I, O, T, S, Z, J, L, N. */
-export const COLORS: readonly (string | null)[] = [
-  null,
-  PALETTE.cyan, // I
-  PALETTE.yellow, // O
-  "#b266ff", // T
-  PALETTE.green, // S
-  PALETTE.magenta, // Z
-  "#4d7cff", // J
-  "#d97a3a", // L — --bronze
-  "#c7d0e0", // N (tuerca) — --silver
-];
-export const GHOST_ALPHA = 0.2;
-export const GLOW = 8;
+// Colores, glow y opacidad del fantasma viven en ./skins.ts (SKINS.clasico = aspecto original).
