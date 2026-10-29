@@ -1,14 +1,14 @@
 "use client";
 import { useCallback, useEffect, useRef } from "react";
 import type { PointerEvent, RefObject } from "react";
-import type { GameStatus } from "@/components/games/registry";
-import type { SkinId } from "@/lib/games/skins";
+import type { GameStatus } from "@/lib/games/platform/contract";
+import type { SkinId } from "@/lib/games/platform/skins";
 import type {
   GameInput,
   TouchButton,
   TouchLayout,
   TouchSlot,
-} from "@/lib/games/touch";
+} from "@/lib/games/platform/touch";
 // Repetición al mantener (botones con `repeat`): press inmediato, espera y luego cada intervalo.
 export const REPEAT_DELAY_MS = 170;
 export const REPEAT_INTERVAL_MS = 50;

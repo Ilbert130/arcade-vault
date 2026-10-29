@@ -1,4 +1,4 @@
-import type { SkinId } from "../skins";
+import type { SkinId } from "@/lib/games/platform/skins";
 // ── Skins de SERPENTINA (solo cosméticas: no cambian rejilla, ritmo ni hitbox) ──
 export type SerpentinaSkin = {
   bg: string;

@@ -1,4 +1,4 @@
-import type { SkinId } from "../skins";
+import type { SkinId } from "@/lib/games/platform/skins";
 // Mismas claves que la antigua PALETTE, más los ajustes de estilo (glow, contornos, formas).
 export type RanariaSkin = {
   bg: string;

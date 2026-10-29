@@ -1,15 +1,15 @@
-export type TetrisHud = {
+export type CaidaHud = {
   score: number;
   lines: number;
   level: number;
 };
-export type TetrisCallbacks = {
+export type CaidaCallbacks = {
   /** Se llama solo cuando cambia score, lines o level (no en cada frame). */
-  onHud: (hud: TetrisHud) => void;
+  onHud: (hud: CaidaHud) => void;
   /** Se llama una vez cuando la pieza nueva colisiona al aparecer. */
   onGameOver: (finalScore: number) => void;
 };
-export type TetrisGame = {
+export type CaidaGame = {
   start: () => void; // inicia la partida desde cero y el bucle rAF
   pause: () => void; // congela update (sigue dibujando el último frame)
   resume: () => void; // continúa; reinicia el reloj de dt
@@ -20,7 +20,7 @@ export type TetrisGame = {
   releaseAll: () => void; // suelta todas las acciones mantenidas
 };
 /** Acciones de entrada del motor (teclado y mando táctil). */
-export type TetrisAction =
+export type CaidaAction =
   "moveLeft" | "moveRight" | "softDrop" | "rotate" | "hardDrop";
 /** Matriz de celdas: 0 = vacío, 1–8 = índice de color/pieza (I, O, T, S, Z, J, L, N). */
 export type Matrix = number[][];

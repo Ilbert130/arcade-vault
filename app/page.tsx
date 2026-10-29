@@ -1,5 +1,5 @@
-import Home from "@/components/Home";
-import { getGames } from "@/lib/games/queries";
+import Home from "@/components/home/Home";
+import { getGames } from "@/lib/catalog/queries";
 
 export default async function Page() {
   const games = await getGames();

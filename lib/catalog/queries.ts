@@ -1,7 +1,12 @@
 // Solo servidor: usa el cliente de Supabase con cookies (lib/supabase/server.ts).
 import { createClient } from "@/lib/supabase/server";
 import type { Database } from "@/lib/supabase/database.types";
-import type { Game, GameWithStats, LeaderboardRow } from "./types";
+import type {
+  Game,
+  GameStats,
+  GameWithStats,
+  LeaderboardRow,
+} from "@/lib/catalog/types";
 type LeaderboardView = Database["public"]["Views"]["leaderboard"]["Row"];
 // Las columnas de las vistas llegan como nullable en los tipos generados.
 function toLeaderboardRow(r: LeaderboardView): LeaderboardRow {
@@ -11,15 +16,6 @@ function toLeaderboardRow(r: LeaderboardView): LeaderboardRow {
     score: r.score ?? 0,
     achievedAt: r.achieved_at ?? "",
   };
-}
-// dd/mm/aaaa (es-ES) para las fechas de las marcas.
-export function formatScoreDate(iso: string): string {
-  if (!iso) return "—";
-  return new Date(iso).toLocaleDateString("es-ES", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
 }
 export async function getGames(): Promise<Game[]> {
   try {
@@ -73,9 +69,7 @@ export async function getGame(id: string): Promise<Game | null> {
     return null;
   }
 }
-export async function getGameStats(
-  id: string,
-): Promise<{ best: number; plays: number }> {
+export async function getGameStats(id: string): Promise<GameStats> {
   const empty = { best: 0, plays: 0 };
   try {
     const supabase = await createClient();

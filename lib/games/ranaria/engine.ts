@@ -29,7 +29,7 @@ import {
   drawHud,
   drawLanes,
 } from "./draw";
-import { DEFAULT_SKIN, type SkinId } from "../skins";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/games/platform/skins";
 import { SKINS } from "./skins";
 import {
   buildLanes,

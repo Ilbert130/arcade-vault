@@ -18,7 +18,7 @@ import {
   TOTAL_CELLS,
   W,
 } from "./constants";
-import { DEFAULT_SKIN, type SkinId } from "../skins";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/games/platform/skins";
 import {
   cellEquals,
   drawBackground,

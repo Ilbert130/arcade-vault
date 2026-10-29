@@ -1,16 +1,16 @@
-import type { SkinId } from "@/lib/games/skins";
-export type AsteroidsHud = {
+import type { SkinId } from "@/lib/games/platform/skins";
+export type RocasHud = {
   score: number;
   lives: number;
   level: number;
 };
-export type AsteroidsCallbacks = {
+export type RocasCallbacks = {
   /** Se llama solo cuando cambia score, lives o level (no en cada frame). */
-  onHud: (hud: AsteroidsHud) => void;
+  onHud: (hud: RocasHud) => void;
   /** Se llama una vez cuando lives llega a 0. */
   onGameOver: (finalScore: number) => void;
 };
-export type AsteroidsGame = {
+export type RocasGame = {
   start: () => void; // inicia la partida desde cero y el bucle rAF
   pause: () => void; // congela update (sigue dibujando el último frame)
   resume: () => void; // continúa; reinicia el reloj de dt
@@ -22,6 +22,6 @@ export type AsteroidsGame = {
   releaseAll: () => void; // suelta todas las acciones mantenidas
 };
 /** Acciones de entrada del motor (teclado y mando táctil). */
-export type AsteroidsAction = "rotateLeft" | "rotateRight" | "thrust" | "fire";
+export type RocasAction = "rotateLeft" | "rotateRight" | "thrust" | "fire";
 /** Mapa de acciones mantenidas. */
-export type ActionMap = Partial<Record<AsteroidsAction, boolean>>;
+export type ActionMap = Partial<Record<RocasAction, boolean>>;

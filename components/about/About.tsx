@@ -1,26 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useReveal } from "@/components/shared/useReveal";
 import { sendContactMessage } from "@/app/about/actions";
-
-function useReveal() {
-  useEffect(() => {
-    const els = document.querySelectorAll(".reveal");
-    const io = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("in");
-            io.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.12 }
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-}
 
 type FormState = { name: string; email: string; msg: string };
 type Status = "idle" | "sending" | "sent" | "error";
@@ -77,18 +59,27 @@ export default function About() {
         <div className="kicker pixel neon-yellow">▸ ACERCA DE</div>
         <h1 className="about-title">ACERCA DE ARCADE VAULT</h1>
         <p className="about-mission">
-          ARCADE VAULT nació del amor por los videojuegos clásicos. Nuestra misión es preservar y celebrar
-          los arcades que definieron una generación, haciéndolos accesibles para todos, en cualquier lugar
-          y sin costo.
+          ARCADE VAULT nació del amor por los videojuegos clásicos. Nuestra
+          misión es preservar y celebrar los arcades que definieron una
+          generación, haciéndolos accesibles para todos, en cualquier lugar y
+          sin costo.
         </p>
 
         <div className="highlight-row">
           {[
             { i: "HEART", t: "HECHO CON ❤️ PARA JUGADORES", c: "magenta" },
-            { i: "BROWSER", t: "JUEGOS EN HTML — CORREN EN CUALQUIER NAVEGADOR", c: "cyan" },
+            {
+              i: "BROWSER",
+              t: "JUEGOS EN HTML — CORREN EN CUALQUIER NAVEGADOR",
+              c: "cyan",
+            },
             { i: "PLANT", t: "PROYECTO EN CONSTANTE CRECIMIENTO", c: "green" },
           ].map((h, i) => (
-            <div key={i} className={"highlight " + h.c} style={{ transitionDelay: i * 80 + "ms" }}>
+            <div
+              key={i}
+              className={"highlight " + h.c}
+              style={{ transitionDelay: i * 80 + "ms" }}
+            >
               <HighlightIcon kind={h.i} />
               <div className="hl-text pixel">{h.t}</div>
             </div>
@@ -114,8 +105,8 @@ export default function About() {
             <div className="kicker pixel neon-cyan">▸ CONTACTO</div>
             <h2 className="contact-title">CONTÁCTANOS</h2>
             <p className="contact-sub">
-              ¿Tienes alguna sugerencia, quieres proponer un juego, o simplemente quieres saludar?
-              Escríbenos.
+              ¿Tienes alguna sugerencia, quieres proponer un juego, o
+              simplemente quieres saludar? Escríbenos.
             </p>
             <div className="contact-tips">
               <div className="tip">
@@ -130,7 +121,10 @@ export default function About() {
             </div>
           </div>
 
-          <form className={"contact-form" + (shake ? " shake" : "")} onSubmit={onSubmit}>
+          <form
+            className={"contact-form" + (shake ? " shake" : "")}
+            onSubmit={onSubmit}
+          >
             {status !== "sent" ? (
               <>
                 <div className="field">
@@ -146,7 +140,9 @@ export default function About() {
                   <input
                     type="email"
                     value={form.email}
-                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, email: e.target.value })
+                    }
                     placeholder="jugador@vault.gg"
                   />
                 </div>
@@ -167,7 +163,9 @@ export default function About() {
                 >
                   {status === "sending" ? "▶  ENVIANDO…" : "▶  ENVIAR MENSAJE"}
                 </button>
-                {status === "error" && <div className="contact-error">{errorMsg}</div>}
+                {status === "error" && (
+                  <div className="contact-error">{errorMsg}</div>
+                )}
               </>
             ) : (
               <div className="terminal-success">
@@ -179,17 +177,22 @@ export default function About() {
                 </div>
                 <div className="term-body">
                   <div className="line">
-                    <span className="prompt">vault@arcade:~$</span> ./send_message --to=team
+                    <span className="prompt">vault@arcade:~$</span>{" "}
+                    ./send_message --to=team
                   </div>
                   <div className="line dim">[OK] Conectando con servidor…</div>
                   <div className="line dim">[OK] Validando contenido…</div>
                   <div className="line dim">[OK] Transmitiendo paquete…</div>
                   <div className="line success">
-                    &gt; MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS, {sent?.toUpperCase()}.
-                    <span className="caret">_</span>
+                    &gt; MENSAJE RECIBIDO. TE RESPONDEREMOS PRONTO. GRACIAS,{" "}
+                    {sent?.toUpperCase()}.<span className="caret">_</span>
                   </div>
                   <div style={{ marginTop: 18 }}>
-                    <button className="btn ghost" type="button" onClick={resetForm}>
+                    <button
+                      className="btn ghost"
+                      type="button"
+                      onClick={resetForm}
+                    >
                       ENVIAR OTRO MENSAJE
                     </button>
                   </div>
@@ -227,7 +230,15 @@ function HighlightIcon({ kind }: { kind: string }) {
     return (
       <svg className="hl-icon" viewBox="0 0 16 16">
         <g fill={C}>
-          <rect x="1" y="2" width="14" height="12" fill="none" stroke={C} strokeWidth="1.4" />
+          <rect
+            x="1"
+            y="2"
+            width="14"
+            height="12"
+            fill="none"
+            stroke={C}
+            strokeWidth="1.4"
+          />
           <rect x="1" y="2" width="14" height="3" />
           <rect x="3" y="3" width="1" height="1" fill="#0a0a0f" />
           <rect x="5" y="3" width="1" height="1" fill="#0a0a0f" />

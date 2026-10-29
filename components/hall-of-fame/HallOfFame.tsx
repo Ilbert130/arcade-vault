@@ -1,8 +1,6 @@
 import Link from "next/link";
-import { formatScoreDate } from "@/lib/games/queries";
-import type { Game, LeaderboardRow } from "@/lib/games/types";
-const fmt = (n: number) => n.toLocaleString("es-ES");
-const rankLabel = (n: number) => String(n).padStart(2, "0");
+import { formatRank, formatScore, formatScoreDate } from "@/lib/format";
+import type { Game, LeaderboardRow } from "@/lib/catalog/types";
 const PODIUM = [
   { index: 1, cls: "silver" },
   { index: 0, cls: "gold" },
@@ -72,14 +70,14 @@ export default function HallOfFame({
                     className="rank-num"
                     style={gold ? { fontSize: 36, marginTop: 4 } : undefined}
                   >
-                    {rankLabel(r.rank)}
+                    {formatRank(r.rank)}
                   </div>
                   <div className="name">{r.username}</div>
                   <div
                     className="score"
                     style={gold ? { fontSize: 20 } : undefined}
                   >
-                    {fmt(r.score)}
+                    {formatScore(r.score)}
                   </div>
                   <div className="date">{formatScoreDate(r.achievedAt)}</div>
                 </div>
@@ -108,9 +106,9 @@ export default function HallOfFame({
                 }
                 style={{ animationDelay: `${i * 50}ms` }}
               >
-                <div className="rk">#{rankLabel(r.rank)}</div>
+                <div className="rk">#{formatRank(r.rank)}</div>
                 <div className="pl">{r.username}</div>
-                <div className="sc">{fmt(r.score)}</div>
+                <div className="sc">{formatScore(r.score)}</div>
                 <div className="dt">{formatScoreDate(r.achievedAt)}</div>
               </div>
             ))}
@@ -126,7 +124,7 @@ export default function HallOfFame({
               </div>
               <div className="tr you">
                 <div className="rk" style={{ color: "var(--yellow)" }}>
-                  #{rankLabel(you.rank)}
+                  #{formatRank(you.rank)}
                 </div>
                 <div className="pl" style={{ color: "var(--yellow)" }}>
                   {you.username}
@@ -138,7 +136,7 @@ export default function HallOfFame({
                     textShadow: "0 0 6px rgba(245,255,0,0.5)",
                   }}
                 >
-                  {fmt(you.score)}
+                  {formatScore(you.score)}
                 </div>
                 <div className="dt">{formatScoreDate(you.achievedAt)}</div>
               </div>

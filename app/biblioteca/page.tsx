@@ -1,5 +1,5 @@
-import Library from "@/components/Library";
-import { getGamesWithStats } from "@/lib/games/queries";
+import Library from "@/components/library/Library";
+import { getGamesWithStats } from "@/lib/catalog/queries";
 
 export default async function Page() {
   const games = await getGamesWithStats();

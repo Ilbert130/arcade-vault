@@ -15,7 +15,7 @@ import {
   TRIPLE_SPREAD,
   W,
 } from "./constants";
-import type { AsteroidsSkin } from "./skins";
+import type { RocasSkin } from "./skins";
 import type { ActionMap } from "./types";
 // ── Utils ─────────────────────────────────────────────────────────────────────
 export const wrap = (v: number, max: number) => ((v % max) + max) % max;
@@ -29,7 +29,7 @@ export const randInt = (min: number, max: number) =>
   Math.floor(rand(min, max + 1));
 export type AsteroidSize = 1 | 2 | 3;
 /** Pasada fina del núcleo (skin neón) sobre el trazo actual, sin glow. */
-function strokeCore(ctx: CanvasRenderingContext2D, skin: AsteroidsSkin) {
+function strokeCore(ctx: CanvasRenderingContext2D, skin: RocasSkin) {
   if (!skin.core) return;
   ctx.shadowBlur = 0;
   ctx.strokeStyle = skin.core;
@@ -57,7 +57,7 @@ export class Bullet {
     this.ttl -= dt;
     if (this.ttl <= 0) this.dead = true;
   }
-  draw(ctx: CanvasRenderingContext2D, skin: AsteroidsSkin) {
+  draw(ctx: CanvasRenderingContext2D, skin: RocasSkin) {
     ctx.save();
     ctx.fillStyle = skin.yellow;
     ctx.shadowColor = skin.yellow;
@@ -130,7 +130,7 @@ export class Asteroid {
       new Asteroid(this.x, this.y, next),
     ];
   }
-  draw(ctx: CanvasRenderingContext2D, skin: AsteroidsSkin) {
+  draw(ctx: CanvasRenderingContext2D, skin: RocasSkin) {
     ctx.save();
     ctx.translate(this.x, this.y);
     ctx.rotate(this.rot);
@@ -172,7 +172,7 @@ export class PowerUp {
     this.ttl -= dt;
     if (this.ttl <= 0) this.dead = true;
   }
-  draw(ctx: CanvasRenderingContext2D, skin: AsteroidsSkin, font: string) {
+  draw(ctx: CanvasRenderingContext2D, skin: RocasSkin, font: string) {
     if (this.ttl < 2 && Math.floor(this.ttl * 8) % 2 === 0) return;
     const pulse = 0.85 + Math.sin(performance.now() / 150) * 0.15;
     ctx.save();
@@ -259,7 +259,7 @@ export class Ship {
     return [new Bullet(ox, oy, this.angle)];
   }
   /** `blink` desactiva el parpadeo de invencibilidad (p. ej. antes de empezar). */
-  draw(ctx: CanvasRenderingContext2D, skin: AsteroidsSkin, blink = true) {
+  draw(ctx: CanvasRenderingContext2D, skin: RocasSkin, blink = true) {
     if (this.dead) return;
     // Parpadeo durante invencibilidad de reaparición
     if (
@@ -329,7 +329,7 @@ export class Particle {
     if (this.ttl <= 0) this.dead = true;
   }
   // Sin shadowBlur: puede haber muchas partículas a la vez.
-  draw(ctx: CanvasRenderingContext2D, skin: AsteroidsSkin) {
+  draw(ctx: CanvasRenderingContext2D, skin: RocasSkin) {
     const alpha = this.ttl / this.life;
     ctx.strokeStyle = `rgba(${skin.particleRgb},${alpha.toFixed(2)})`;
     ctx.lineWidth = 1;

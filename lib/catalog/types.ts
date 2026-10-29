@@ -2,7 +2,9 @@ import type { Database } from "@/lib/supabase/database.types";
 
 export type Game = Database["public"]["Tables"]["games"]["Row"];
 
-export type GameWithStats = Game & { best: number; plays: number };
+export type GameStats = { best: number; plays: number };
+
+export type GameWithStats = Game & GameStats;
 
 export type LeaderboardRow = {
   rank: number;

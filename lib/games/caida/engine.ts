@@ -39,10 +39,10 @@ import {
 import type {
   Board,
   Piece,
-  TetrisAction,
-  TetrisCallbacks,
-  TetrisGame,
-  TetrisHud,
+  CaidaAction,
+  CaidaCallbacks,
+  CaidaGame,
+  CaidaHud,
 } from "./types";
 type Phase = "idle" | "playing" | "paused" | "gameover";
 /** Teclas que el juego consume; se bloquea su acción por defecto mientras se juega. */
@@ -54,7 +54,7 @@ const GAME_KEYS = new Set([
   "Space",
 ]);
 /** Traducción tecla → acción del motor. */
-const KEY_ACTIONS: Record<string, TetrisAction> = {
+const KEY_ACTIONS: Record<string, CaidaAction> = {
   ArrowLeft: "moveLeft",
   ArrowRight: "moveRight",
   ArrowDown: "softDrop",
@@ -63,13 +63,13 @@ const KEY_ACTIONS: Record<string, TetrisAction> = {
   Space: "hardDrop",
 };
 /** Acciones que ignoran el auto-repeat del teclado (en el mando no llevan `repeat`). */
-const ONCE_ACTIONS = new Set<TetrisAction>(["rotate", "hardDrop"]);
+const ONCE_ACTIONS = new Set<CaidaAction>(["rotate", "hardDrop"]);
 const dropIntervalMs = (level: number) =>
   Math.max(MIN_DROP_MS, BASE_DROP_MS - (level - 1) * LEVEL_STEP_MS);
-export function createTetrisGame(
+export function createCaidaGame(
   canvas: HTMLCanvasElement,
-  callbacks: TetrisCallbacks,
-): TetrisGame {
+  callbacks: CaidaCallbacks,
+): CaidaGame {
   const ctxOrNull = canvas.getContext("2d");
   if (!ctxOrNull) throw new Error("Canvas 2D no disponible");
   const ctx: CanvasRenderingContext2D = ctxOrNull;
@@ -90,7 +90,7 @@ export function createTetrisGame(
   let dpr = 0;
   let listening = false;
   let gameOverEmitted = false;
-  let lastHud: TetrisHud | null = null;
+  let lastHud: CaidaHud | null = null;
   // ── HUD hacia React ─────────────────────────────────────────────────────────
   function emitHud() {
     if (

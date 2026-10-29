@@ -1,113 +1,25 @@
 "use client";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { MouseEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { saveScore } from "@/app/juegos/[id]/jugar/actions";
-import type { Game } from "@/lib/games/types";
+import type { Game } from "@/lib/catalog/types";
+import { formatRank, formatScore } from "@/lib/format";
 import { getCurrentUsername } from "@/lib/supabase/client";
+import type { GameStatus, GenericHud } from "@/lib/games/platform/contract";
+import type { GameInput } from "@/lib/games/platform/touch";
 import { GAME_REGISTRY } from "@/components/games/registry";
-import type { GameStatus, GenericHud } from "@/components/games/registry";
-import TouchPad from "@/components/games/TouchPad";
-import type { GameInput } from "@/lib/games/touch";
-import {
-  DEFAULT_SKIN,
-  SKIN_IDS,
-  SKIN_LABELS,
-  isSkinId,
-} from "@/lib/games/skins";
-import type { SkinId } from "@/lib/games/skins";
+import SkinSwitch from "@/components/player/SkinSwitch";
+import TouchPad from "@/components/player/TouchPad";
+import { useGameSkin } from "@/components/player/useGameSkin";
 const START_LIVES = 3;
 // Formato de cada valor del HUD (se escribe directo en el DOM, sin pasar por React).
-const fmtScore = (n: number) => n.toLocaleString("es-ES");
 const fmtLives = (n: number) => "♥ ".repeat(n).trim() || "—";
-const fmtLevel = (n: number) => String(n).padStart(2, "0");
 // Tras pulsar un botón se le quita el foco para que Espacio no vuelva a activarlo.
 const blurTarget = (e: MouseEvent<HTMLButtonElement>) => e.currentTarget.blur();
 const togglePause = (s: GameStatus): GameStatus =>
   s === "playing" ? "paused" : s === "paused" ? "playing" : s;
-// ── Skin por juego (solo cosmética), recordada en localStorage ──────────────
-const SKIN_EVENT = "av-skin-change";
-const skinKey = (gameId: string) => `av-skin:${gameId}`;
-// Respaldo en memoria si localStorage no está disponible (modo privado, cuota…).
-const memorySkins: Record<string, SkinId> = {};
-function readSkin(gameId: string): SkinId {
-  const mem = memorySkins[gameId];
-  if (mem) return mem;
-  try {
-    const stored = window.localStorage.getItem(skinKey(gameId));
-    return isSkinId(stored) ? stored : DEFAULT_SKIN;
-  } catch {
-    return DEFAULT_SKIN;
-  }
-}
-function writeSkin(gameId: string, skin: SkinId) {
-  memorySkins[gameId] = skin;
-  try {
-    window.localStorage.setItem(skinKey(gameId), skin);
-  } catch {
-    // Sin persistencia: la elección dura lo que la pestaña.
-  }
-  window.dispatchEvent(new Event(SKIN_EVENT));
-}
-function subscribeSkin(onChange: () => void) {
-  // Otra pestaña cambió la skin: manda localStorage, no la copia en memoria.
-  const onStorage = (e: StorageEvent) => {
-    if (e.key?.startsWith("av-skin:"))
-      delete memorySkins[e.key.slice("av-skin:".length)];
-    onChange();
-  };
-  window.addEventListener(SKIN_EVENT, onChange);
-  window.addEventListener("storage", onStorage);
-  return () => {
-    window.removeEventListener(SKIN_EVENT, onChange);
-    window.removeEventListener("storage", onStorage);
-  };
-}
-function SkinSwitch({
-  value,
-  onChange,
-}: {
-  value: SkinId;
-  onChange: (skin: SkinId) => void;
-}) {
-  return (
-    <div className="skin-switch">
-      <span className="skin-switch-label" id="skin-switch-label">
-        ASPECTO
-      </span>
-      <div
-        className="skin-switch-group"
-        role="group"
-        aria-labelledby="skin-switch-label"
-      >
-        {SKIN_IDS.map((id) => (
-          <button
-            key={id}
-            type="button"
-            className={`skin-opt skin-${id}${value === id ? " on" : ""}`}
-            aria-pressed={value === id}
-            // Sin foco al pulsar con el ratón: el teclado sigue en el juego.
-            onMouseDown={(e) => e.preventDefault()}
-            onClick={(e) => {
-              blurTarget(e);
-              onChange(id);
-            }}
-          >
-            <span className="skin-led" aria-hidden="true" />
-            {SKIN_LABELS[id]}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
 type SaveState =
   { status: "idle" | "saving" | "saved" } | { status: "error"; error: string };
 export default function GamePlayer({ game }: { game: Game }) {
@@ -115,13 +27,7 @@ export default function GamePlayer({ game }: { game: Game }) {
   const entry = GAME_REGISTRY[game.id];
   const isReal = !!entry;
   const hudFields = entry?.hud ?? ["score", "lives", "level"];
-  // En el servidor (y en la hidratación) siempre CLÁSICO; luego, la guardada.
-  const skin = useSyncExternalStore(
-    subscribeSkin,
-    () => readSkin(game.id),
-    () => DEFAULT_SKIN,
-  );
-  const changeSkin = (next: SkinId) => writeSkin(game.id, next);
+  const [skin, changeSkin] = useGameSkin(game.id);
   // El HUD cambia con cada jugada: vive en refs y se escribe en el DOM (sin re-renders).
   const scoreRef = useRef(0);
   const levelRef = useRef(1);
@@ -135,14 +41,14 @@ export default function GamePlayer({ game }: { game: Game }) {
     };
     if (hud.score !== undefined) {
       scoreRef.current = hud.score;
-      put(scoreEl.current, fmtScore(hud.score));
+      put(scoreEl.current, formatScore(hud.score));
     }
     if (hud.lives !== undefined) put(livesEl.current, fmtLives(hud.lives));
     if (hud.level !== undefined) {
       levelRef.current = hud.level;
-      put(levelEl.current, fmtLevel(hud.level));
+      put(levelEl.current, formatRank(hud.level));
     }
-    if (hud.lines !== undefined) put(linesEl.current, fmtScore(hud.lines));
+    if (hud.lines !== undefined) put(linesEl.current, formatScore(hud.lines));
   }, []);
   // Los juegos reales esperan en "ready" a que el jugador empiece; la simulación arranca jugando.
   const [status, setStatus] = useState<GameStatus>(
@@ -267,7 +173,7 @@ export default function GamePlayer({ game }: { game: Game }) {
           <div className="hud-stat">
             <div className="l">Puntuación</div>
             <div className="v" ref={scoreEl}>
-              {fmtScore(0)}
+              {formatScore(0)}
             </div>
           </div>
           {hudFields.includes("lives") && (
@@ -282,7 +188,7 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="hud-stat lines">
               <div className="l">Líneas</div>
               <div className="v" ref={linesEl}>
-                {fmtScore(0)}
+                {formatScore(0)}
               </div>
             </div>
           )}
@@ -290,7 +196,7 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div className="hud-stat level">
               <div className="l">Nivel</div>
               <div className="v" ref={levelEl}>
-                {fmtLevel(1)}
+                {formatRank(1)}
               </div>
             </div>
           )}
@@ -431,7 +337,7 @@ export default function GamePlayer({ game }: { game: Game }) {
             <div
               className="final"
               ref={(el) => {
-                if (el) el.textContent = fmtScore(scoreRef.current);
+                if (el) el.textContent = formatScore(scoreRef.current);
               }}
             />
             {!game.playable ? (

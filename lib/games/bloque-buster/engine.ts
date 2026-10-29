@@ -20,7 +20,7 @@ import {
   START_LIVES,
   W,
 } from "./constants";
-import { DEFAULT_SKIN, type SkinId } from "../skins";
+import { DEFAULT_SKIN, type SkinId } from "@/lib/games/platform/skins";
 import {
   buildNeonBlock,
   collideAABB,

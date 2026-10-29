@@ -1,5 +1,5 @@
-import { DEFAULT_SKIN } from "@/lib/games/skins";
-import type { SkinId } from "@/lib/games/skins";
+import { DEFAULT_SKIN } from "@/lib/games/platform/skins";
+import type { SkinId } from "@/lib/games/platform/skins";
 import {
   H,
   MAX_DT,
@@ -23,10 +23,10 @@ import {
 } from "./entities";
 import { SKINS } from "./skins";
 import type {
-  AsteroidsCallbacks,
-  AsteroidsGame,
-  AsteroidsAction,
-  AsteroidsHud,
+  RocasCallbacks,
+  RocasGame,
+  RocasAction,
+  RocasHud,
   ActionMap,
 } from "./types";
 /** Separación de la rejilla decorativa (skins con `grid`). */
@@ -41,19 +41,19 @@ const GAME_KEYS = new Set([
   "Space",
 ]);
 /** Traducción tecla → acción del motor. */
-const KEY_ACTIONS: Record<string, AsteroidsAction> = {
+const KEY_ACTIONS: Record<string, RocasAction> = {
   ArrowLeft: "rotateLeft",
   ArrowRight: "rotateRight",
   ArrowUp: "thrust",
   Space: "fire",
 };
-const isAction = (a: string): a is AsteroidsAction =>
-  Object.values(KEY_ACTIONS).includes(a as AsteroidsAction);
-export function createAsteroidsGame(
+const isAction = (a: string): a is RocasAction =>
+  Object.values(KEY_ACTIONS).includes(a as RocasAction);
+export function createRocasGame(
   canvas: HTMLCanvasElement,
-  callbacks: AsteroidsCallbacks,
+  callbacks: RocasCallbacks,
   skinId: SkinId = DEFAULT_SKIN,
-): AsteroidsGame {
+): RocasGame {
   const ctxOrNull = canvas.getContext("2d");
   if (!ctxOrNull) throw new Error("Canvas 2D no disponible");
   const ctx: CanvasRenderingContext2D = ctxOrNull;
@@ -82,7 +82,7 @@ export function createAsteroidsGame(
   let dpr = 0;
   let listening = false;
   let gameOverEmitted = false;
-  let lastHud: AsteroidsHud | null = null;
+  let lastHud: RocasHud | null = null;
   // ── Input ───────────────────────────────────────────────────────────────────
   const inProgress = () => phase === "playing" || phase === "dead";
   function press(action: string) {
@@ -104,7 +104,7 @@ export function createAsteroidsGame(
     const action = KEY_ACTIONS[e.code];
     if (action) release(action);
   }
-  function pressed(action: AsteroidsAction) {
+  function pressed(action: RocasAction) {
     const val = !!justPressed[action];
     justPressed[action] = false;
     return val;

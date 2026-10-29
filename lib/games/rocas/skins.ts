@@ -1,9 +1,9 @@
-import type { SkinId } from "@/lib/games/skins";
+import type { SkinId } from "@/lib/games/platform/skins";
 // ── Skins de ROCAS (solo cosméticas: no tocan tamaños, hitboxes ni HUD) ──────
 // Claves de color heredadas de la antigua PALETTE; su papel en el juego:
 // cyan = nave y vidas · magenta = asteroides · yellow = balas · green = power-up
 // ink = textos del HUD · inkDim = reservado · bg = fondo.
-export type AsteroidsSkin = {
+export type RocasSkin = {
   bg: string;
   ink: string;
   inkDim: string;
@@ -30,7 +30,7 @@ export type AsteroidsSkin = {
   /** Balas como píxel cuadrado en lugar de punto redondo. */
   squareBullets: boolean;
 };
-export const SKINS: Record<SkinId, AsteroidsSkin> = {
+export const SKINS: Record<SkinId, RocasSkin> = {
   // Aspecto original, valor por valor (antigua PALETTE + GLOW 10).
   clasico: {
     bg: "#000000",

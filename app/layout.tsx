@@ -4,7 +4,7 @@ import {
   JetBrains_Mono,
   Courier_Prime,
 } from "next/font/google";
-import Nav from "@/components/Nav";
+import Nav from "@/components/layout/Nav";
 import "./globals.css";
 const pixelFont = Press_Start_2P({
   variable: "--font-pixel",

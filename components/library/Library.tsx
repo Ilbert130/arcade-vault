@@ -1,19 +1,24 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CATS } from "@/lib/data";
-import type { GameWithStats } from "@/lib/games/types";
-import GameCard from "@/components/GameCard";
+import { CATS } from "@/lib/catalog/categories";
+import type { GameWithStats } from "@/lib/catalog/types";
+import GameCard from "@/components/shared/GameCard";
 
 export default function Library({ games }: { games: GameWithStats[] }) {
   const [q, setQ] = useState("");
   const [cat, setCat] = useState("TODOS");
 
-  const cats = useMemo(() => CATS.filter((c) => c === "TODOS" || games.some((g) => g.cat === c)), [games]);
+  const cats = useMemo(
+    () => CATS.filter((c) => c === "TODOS" || games.some((g) => g.cat === c)),
+    [games],
+  );
 
   const filtered = useMemo(() => {
     return games.filter(
-      (g) => (cat === "TODOS" || g.cat === cat) && g.title.toLowerCase().includes(q.toLowerCase())
+      (g) =>
+        (cat === "TODOS" || g.cat === cat) &&
+        g.title.toLowerCase().includes(q.toLowerCase()),
     );
   }, [games, q, cat]);
 
@@ -29,11 +34,19 @@ export default function Library({ games }: { games: GameWithStats[] }) {
       <div className="av-filters">
         <div className="av-search">
           <span className="ico">⌕</span>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar un juego por nombre…" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar un juego por nombre…"
+          />
         </div>
         <div className="av-chips">
           {cats.map((c) => (
-            <button key={c} className={"chip" + (cat === c ? " active" : "")} onClick={() => setCat(c)}>
+            <button
+              key={c}
+              className={"chip" + (cat === c ? " active" : "")}
+              onClick={() => setCat(c)}
+            >
               {c}
             </button>
           ))}
@@ -45,8 +58,22 @@ export default function Library({ games }: { games: GameWithStats[] }) {
           <GameCard key={g.id} game={g} />
         ))}
         {filtered.length === 0 && (
-          <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: 80, color: "var(--ink-faint)" }}>
-            <div className="pixel" style={{ fontSize: 14, color: "var(--magenta)", marginBottom: 12 }}>
+          <div
+            style={{
+              gridColumn: "1 / -1",
+              textAlign: "center",
+              padding: 80,
+              color: "var(--ink-faint)",
+            }}
+          >
+            <div
+              className="pixel"
+              style={{
+                fontSize: 14,
+                color: "var(--magenta)",
+                marginBottom: 12,
+              }}
+            >
               NO HAY RESULTADOS
             </div>
             <div>Intenta otra búsqueda o categoría.</div>
