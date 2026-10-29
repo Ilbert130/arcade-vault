@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import GamePlayer from "@/components/GamePlayer";
-import { getGame } from "@/lib/games/queries";
+import GamePlayer from "@/components/player/GamePlayer";
+import { getGame } from "@/lib/catalog/queries";
 
 export default async function GamePlayerPage(
   props: PageProps<"/juegos/[id]/jugar">,

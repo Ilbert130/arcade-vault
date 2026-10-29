@@ -1,6 +1,6 @@
-import HallOfFame from "@/components/HallOfFame";
-import { getGames, getLeaderboard, getPlayerBest } from "@/lib/games/queries";
-import type { LeaderboardRow } from "@/lib/games/types";
+import HallOfFame from "@/components/hall-of-fame/HallOfFame";
+import { getGames, getLeaderboard, getPlayerBest } from "@/lib/catalog/queries";
+import type { LeaderboardRow } from "@/lib/catalog/types";
 import { createClient } from "@/lib/supabase/server";
 
 // id del usuario con sesión, o null (sin sesión o Supabase no disponible).

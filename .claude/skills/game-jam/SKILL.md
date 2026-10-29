@@ -14,14 +14,14 @@ Responde en el idioma del usuario; todo lo que se escribe en archivos va en espa
 
 1. **Tema**: el argumento del skill. Si falta, pregúntalo y para.
 2. `tema-slug`: kebab-case corto sin acentos ni palabras vacías ("juego sobre café" → `cafe`).
-3. `fecha`: hoy (YYYY-MM-DD). Carpeta de la jam: `game-jam/<fecha>-<tema-slug>/` (si ya existe, añade `-2`, `-3`…). Créala.
+3. `fecha`: hoy (YYYY-MM-DD). Carpeta de la jam: `docs/game-jam/<fecha>-<tema-slug>/` (si ya existe, añade `-2`, `-3`…). Créala.
 4. `NN`: siguiente número libre en `specs/` (`ls specs/`, dos dígitos).
 5. `ids ocupados`: todos los ids de `supabase/migrations/*games_scores.sql` + los de la tabla de `.claude/agent-memory/game-planner/MEMORY.md`.
 6. Lee `references/angulos.md` (en este skill) para pasar cada brief.
 
 ## 2. Lanzar a los tres diseñadores en paralelo
 
-En **un único mensaje**, tres llamadas a la herramienta Agent con `subagent_type: "game-jam-designer"` (descripción "Game jam propuesta A/B/C"). Cada prompt incluye: tema, ángulo con su brief completo copiado de `angulos.md`, `salida` (`game-jam/<carpeta>/propuesta-a.md`, `-b`, `-c`), `NN`, `ids ocupados`, `fecha`, y la frase: "Otros dos diseñadores cubren los otros ángulos; no los imites."
+En **un único mensaje**, tres llamadas a la herramienta Agent con `subagent_type: "game-jam-designer"` (descripción "Game jam propuesta A/B/C"). Cada prompt incluye: tema, ángulo con su brief completo copiado de `angulos.md`, `salida` (`docs/game-jam/<carpeta>/propuesta-a.md`, `-b`, `-c`), `NN`, `ids ocupados`, `fecha`, y la frase: "Otros dos diseñadores cubren los otros ángulos; no los imites."
 
 Espera las tres notificaciones antes de seguir; no inventes resultados.
 
@@ -31,7 +31,7 @@ Lee las tres propuestas completas. Si dos comparten mecánica núcleo o `id`, o 
 
 ## 4. Juzgar
 
-Aplica `references/rubrica.md`. Verifica cada spec contra `.claude/skills/add-game/assets/spec-template.md` y `.claude/skills/add-game/references/engine-contract.md`; aplica los vetos. Escribe `game-jam/<carpeta>/veredicto.md` a partir de `assets/veredicto-template.md`, sin dejar placeholders.
+Aplica `references/rubrica.md`. Verifica cada spec contra `.claude/skills/add-game/assets/spec-template.md` y `.claude/skills/add-game/references/engine-contract.md`; aplica los vetos. Escribe `docs/game-jam/<carpeta>/veredicto.md` a partir de `assets/veredicto-template.md`, sin dejar placeholders.
 
 ## 5. Publicar el ganador
 

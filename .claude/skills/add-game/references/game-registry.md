@@ -1,9 +1,9 @@
 # Registry de juegos para GamePlayer
 
-Problema: `components/GamePlayer.tsx` usa `isRocas = game.id === "rocas"` para elegir canvas, overlay de inicio, controles y desactivar la simulación. Eso no escala.
+Problema: `components/player/GamePlayer.tsx` usa `isRocas = game.id === "rocas"` para elegir canvas, overlay de inicio, controles y desactivar la simulación. Eso no escala.
 
 ## Diseño
-Archivo `components/games/registry.tsx` (cliente) con un mapa por `game.id`:
+Archivo `components/games/registry.tsx` (cliente) con un mapa por `game.id`. Los tipos (`GameStatus`, `HudField`, `GenericHud`, `GameRenderProps`, `GameEntry`) viven en `lib/games/platform/contract.ts`:
 
 ```ts
 export type HudFields = Array<"score" | "lives" | "level" | "lines">;
@@ -26,19 +26,19 @@ export const GAME_REGISTRY: Record<string, GameEntry> = { rocas: {...} };
 Cada `XCanvas` ya recibe `{status, onHud, onGameOver}`; si su `Hud` es más específico, adáptalo con un wrapper fino o tipa `onHud` con el `GenericHud` (campos opcionales).
 
 ## Refactor (una sola vez)
-1. Crear el registry con la entrada `rocas` (canvas `AsteroidsCanvas`, `hud: ["score","lives","level"]`, textos actuales del overlay `.rocas-start` y de `.crt-controls`).
-2. En `GamePlayer`: `const entry = GAME_REGISTRY[game.id]`; `const isReal = !!entry`. Sustituir cada `isRocas` por `isReal`, el título/hint del overlay por `entry.startTitle`, y el canvas por `<entry.Canvas …/>`. El estado inicial es `"ready"` si `isReal`, `"playing"` si es simulado; la simulación (`setInterval`) solo corre si `!isReal`. Renombrar clases `.rocas-start*` a genéricas (`.game-start*`) o mantenerlas solo si no estorba, ajustando `globals.css`.
+1. Crear el registry con la entrada `rocas` (canvas `RocasCanvas`, `hud: ["score","lives","level"]`, textos actuales del overlay `.rocas-start` y de `.crt-controls`).
+2. En `GamePlayer`: `const entry = GAME_REGISTRY[game.id]`; `const isReal = !!entry`. Sustituir cada `isRocas` por `isReal`, el título/hint del overlay por `entry.startTitle`, y el canvas por `<entry.Canvas …/>`. El estado inicial es `"ready"` si `isReal`, `"playing"` si es simulado; la simulación (`setInterval`) solo corre si `!isReal`. Renombrar clases `.rocas-start*` a genéricas (`.game-start*`) o mantenerlas solo si no estorba, ajustando `app/styles/`.
 3. HUD: renderizar solo los campos de `entry.hud`.
 4. Verificar que ROCAS se comporta igual (spec 05) y que un juego simulado (p. ej. `/juegos/serpentina/jugar`) no cambió.
 
 ## Añadir un juego después
-Una entrada nueva: `{ Canvas: TetrisCanvas, hud: ["score","lines","level"], controls: "← → MOVER · ↑ ROTAR · ↓ CAÍDA · ESPACIO CAÍDA RÁPIDA · P PAUSA", startTitle: "CAÍDA", touch: …, … }`.
+Una entrada nueva: `{ Canvas: CaidaCanvas, hud: ["score","lines","level"], controls: "← → MOVER · ↑ ROTAR · ↓ CAÍDA · ESPACIO CAÍDA RÁPIDA · P PAUSA", startTitle: "CAÍDA", touch: …, … }`.
 
 ## Mando táctil (`touch`, specs 12 y 13)
-Todo juego del registry declara su `touch` (si falta, `npm run build` falla). Tipos en `lib/games/touch.ts`; el mando lo pinta `components/games/TouchPad.tsx` desde `GamePlayer`, solo visible con `@media (pointer: coarse)`. Su aspecto es el Gamepad MK-II (spec 13): la silueta es la misma en todos los juegos y su paleta sigue la skin del reproductor; un juego nuevo no añade CSS del mando.
+Todo juego del registry declara su `touch` (si falta, `npm run build` falla). Tipos en `lib/games/platform/touch.ts`; el mando lo pinta `components/player/TouchPad.tsx` desde `GamePlayer`, solo visible con `@media (pointer: coarse)`. Su aspecto es el Gamepad MK-II (spec 13): la silueta es la misma en todos los juegos y su paleta sigue la skin del reproductor; un juego nuevo no añade CSS del mando.
 
 ```ts
-touch: touchLayout<TetrisAction>([
+touch: touchLayout<CaidaAction>([
   { slot: "left", action: "moveLeft", label: "MOVER", repeat: true },
   { slot: "right", action: "moveRight", label: "MOVER", repeat: true },
   { slot: "down", action: "softDrop", label: "BAJAR", repeat: true },

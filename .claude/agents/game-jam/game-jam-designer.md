@@ -16,7 +16,7 @@ Escribe en español (títulos y texto de UI incluidos).
 
 - `tema`: la idea de partida (p. ej. "juego sobre café").
 - `ángulo`: A, B o C, con su brief (de `.claude/skills/game-jam/references/angulos.md`).
-- `salida`: ruta exacta del archivo a escribir (p. ej. `game-jam/2026-10-16-cafe/propuesta-a.md`).
+- `salida`: ruta exacta del archivo a escribir (p. ej. `docs/game-jam/2026-10-16-cafe/propuesta-a.md`).
 - `NN`: número del siguiente spec libre.
 - `ids ocupados`: ids del catálogo y de la memoria que no puedes usar.
 - `fecha`: hoy (YYYY-MM-DD).
@@ -28,7 +28,7 @@ Si falta algo, deduce lo razonable y anótalo en "Riesgos / dudas abiertas"; no 
 1. `.claude/skills/game-jam/references/angulos.md` — tu brief y las reglas de diversidad.
 2. `references/implemented-games/implemented-games.md` — juegos jugables hoy.
 3. `supabase/migrations/*games_scores.sql` — catálogo sembrado (`id`, `cat`, `color`, `cover`, `sort_order`): elige un `sort_order` libre.
-4. `lib/data.ts` (`CATS`) y las clases `.cover-*` de `app/globals.css`.
+4. `lib/catalog/categories.ts` (`CATS`) y las clases `.cover-*` de `app/styles/covers.css`.
 5. `.claude/skills/add-game/references/engine-contract.md` — contrato del motor (start/pause/resume/reset/destroy, `onHud`, `onGameOver`).
 6. `.claude/skills/add-game/assets/spec-template.md` — plantilla obligatoria del spec.
 7. `specs/10-snake-serpentina.md` — ejemplo real de spec de juego creado desde cero (nivel de detalle esperado).

@@ -1,0 +1,64 @@
+/* ===== app frame ===== */
+#root {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.av-main {
+  flex: 1;
+}
+/* ===== pixel + neon text ===== */
+.pixel {
+  font-family: var(--pixel);
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+.mono {
+  font-family: var(--mono);
+}
+.neon-cyan {
+  color: var(--cyan);
+  text-shadow:
+    0 0 6px rgba(0, 245, 255, 0.65),
+    0 0 16px rgba(0, 245, 255, 0.45);
+}
+.neon-magenta {
+  color: var(--magenta);
+  text-shadow:
+    0 0 6px rgba(255, 0, 110, 0.65),
+    0 0 16px rgba(255, 0, 110, 0.45);
+}
+.neon-yellow {
+  color: var(--yellow);
+  text-shadow:
+    0 0 6px rgba(245, 255, 0, 0.7),
+    0 0 16px rgba(245, 255, 0, 0.4);
+}
+.neon-green {
+  color: var(--green);
+  text-shadow:
+    0 0 6px rgba(0, 255, 136, 0.6),
+    0 0 16px rgba(0, 255, 136, 0.35);
+}
+.flicker {
+  animation: flicker 5s infinite steps(1, end);
+}
+@keyframes flicker {
+  0%,
+  18%,
+  22%,
+  25%,
+  53%,
+  57%,
+  100% {
+    opacity: 1;
+  }
+  20%,
+  24%,
+  55% {
+    opacity: 0.35;
+  }
+}

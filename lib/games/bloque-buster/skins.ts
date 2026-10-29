@@ -1,4 +1,4 @@
-import type { SkinId } from "../skins";
+import type { SkinId } from "@/lib/games/platform/skins";
 import type { BlockColor } from "./types";
 // ── Skins de BLOQUE BUSTER (solo cosméticas: no cambian tamaños, hitbox ni física) ──
 /** Patrón interior de un bloque plano (distingue tipos sin depender solo del tono). */

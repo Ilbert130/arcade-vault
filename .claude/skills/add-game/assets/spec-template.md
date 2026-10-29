@@ -14,7 +14,7 @@
 - Componente `components/games/<Name>Canvas.tsx`.
 - Entrada `<id>` en el registry de `GamePlayer` (controles, HUD, overlay de inicio).
 - Migración `supabase/migrations/<timestamp>_<slug>_playable.sql` (`playable = true`; insert si el juego es nuevo), aplicada con el MCP de Supabase.
-- Estilos del juego en `app/globals.css` (diseñados con `/frontend-design`).
+- Estilos del juego en `app/styles/games.css` (diseñados con `/frontend-design`).
 - <Controles, reglas y puntuación del juego.>
 
 **No incluye:**
@@ -32,7 +32,7 @@
 lib/games/<slug>/{types,constants,entities,engine}.ts   nuevo
 components/games/<Name>Canvas.tsx                       nuevo
 components/games/registry.tsx                           entrada nueva
-app/globals.css                                         estilos del juego
+app/styles/games.css                                    estilos del juego
 public/games/<slug>/                                    assets (si aplica)
 supabase/migrations/<timestamp>_<slug>_playable.sql     nuevo
 ```

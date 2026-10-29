@@ -16,14 +16,14 @@ Responde en el idioma del usuario; textos de UI en español. Lee y respeta `CLAU
 ## Entrada
 
 - Un `gameId`. Si no llega, o no existe en `GAME_REGISTRY` (`components/games/registry.tsx`), lista los juegos jugables (`references/implemented-games/implemented-games.md`) y pide uno. No audites "todos" salvo que el usuario lo pida expresamente; en ese caso, itera uno a uno.
-- Mapa id → carpeta del motor: `rocas` → `lib/games/asteroids/`, `caida` → `lib/games/tetris/`; el resto usa el slug (`lib/games/<id>/`). Canvas: `components/games/<Name>Canvas.tsx`.
+- Mapa id → carpeta del motor: `rocas` → `lib/games/rocas/`, `caida` → `lib/games/caida/`; el resto usa el slug (`lib/games/<id>/`). Canvas: `components/games/<Name>Canvas.tsx`.
 - Modo: **auditoría** por defecto; **arreglo** solo si el usuario lo pide o la invocación viene tras `/add-game`.
 
 ## Antes de nada (siempre, en este orden)
 
 1. **Lee tu memoria**: `.claude/agent-memory/game-performance-booster/MEMORY.md` (cifras por juego/skin, riesgos abiertos, método de medición que funcionó, preferencias del usuario).
 2. **Lee el spec 14** completo, en especial _Hallazgos y soluciones aplicadas_ y _Cómo repetir la medición_.
-3. **Lee el estado real** (manda el código sobre la memoria y el spec): `components/GamePlayer.tsx` (efecto `data-player`, `paintHud`, refs del HUD, `handleHud`/`handleGameOver`), el Canvas del juego, su entrada en `registry.tsx`, `lib/games/<dir>/{engine,entities,skins,constants}.ts` y los bloques `html[data-player]`, `.crt-screen::after`, `.touch-pad[data-skin]` y `prefers-reduced-motion` de `app/globals.css`.
+3. **Lee el estado real** (manda el código sobre la memoria y el spec): `components/player/GamePlayer.tsx` (efecto `data-player`, `paintHud`, refs del HUD, `handleHud`/`handleGameOver`), el Canvas del juego, su entrada en `registry.tsx`, `lib/games/<dir>/{engine,entities,skins,constants}.ts` y los bloques `html[data-player]`, `.crt-screen::after`, `.touch-pad[data-skin]` y `prefers-reduced-motion` de `app/styles/*.css` (`background.css`, `player.css`, `touchpad.css`, …).
 4. **Concilia** memoria ↔ código. Si el juego es nuevo, añádelo a la matriz como pendiente.
 
 ## Checklist de auditoría (cada ítem viene de un hallazgo del spec 14)
@@ -33,7 +33,7 @@ Responde en el idioma del usuario; textos de UI en español. Lee y respeta `CLAU
 - [ ] `GamePlayer` pone `data-player` en `<html>` en un efecto de cliente y lo retira en el cleanup.
 - [ ] Bajo `html[data-player]`: `.av-bg::before` sin animación; `.av-bg::after` y `.av-noise` con `display: none`.
 - [ ] `.crt-screen::after` sin `mix-blend-mode` (trama negra con alfa).
-- [ ] Ni el juego ni su Canvas añaden `mix-blend-mode`, `backdrop-filter` ni animaciones de `background-position` a pantalla completa sin desactivarlos bajo `html[data-player]` (`grep -n "mix-blend-mode\|backdrop-filter\|background-position" app/globals.css components/games/<Name>Canvas.tsx`).
+- [ ] Ni el juego ni su Canvas añaden `mix-blend-mode`, `backdrop-filter` ni animaciones de `background-position` a pantalla completa sin desactivarlos bajo `html[data-player]` (`grep -n "mix-blend-mode\|backdrop-filter\|background-position" app/styles/*.css components/games/<Name>Canvas.tsx`).
 
 **2. Re-renders de React** (frames largos y trabajo de script en móvil)
 

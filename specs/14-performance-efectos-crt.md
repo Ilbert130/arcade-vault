@@ -1,7 +1,7 @@
 # 14 — PERFORMANCE: aligerar los efectos de página bajo los juegos
 
 **Estado:** Aprobado
-**Depende de:** SPEC 12-controles-tactiles-movil, SPEC 13-gamepad-mk2 (y los juegos jugables: ROCAS, CAÍDA, BLOQUE BUSTER, SERPENTINA y RANARIA, esta última sin spec numerado: `specs/game-jam/frogger/01-frogger-core.md`)
+**Depende de:** SPEC 12-controles-tactiles-movil, SPEC 13-gamepad-mk2 (y los juegos jugables: ROCAS, CAÍDA, BLOQUE BUSTER, SERPENTINA y RANARIA, esta última con `specs/15-ranaria-frogger.md`)
 **Fecha:** 2026-10-27
 
 **Objetivo:** Que los juegos jueguen a ≥55 fps estables en escritorio y móvil, eliminando el coste de repintado de los efectos de página (fondo animado, ruido SVG, scanlines con `mix-blend-mode`) que corren detrás del canvas mientras se juega, sin cambiar el aspecto del reproductor.

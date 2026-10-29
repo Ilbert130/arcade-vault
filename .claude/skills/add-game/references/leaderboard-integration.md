@@ -4,7 +4,7 @@ Fuente: spec 06. Casi todo es genérico.
 
 ## Ya genérico (no tocar salvo necesidad)
 - `public.games` (catálogo, `playable`), `public.scores` (RLS: insert solo autenticado, `user_id = auth.uid()`, juego `playable`), vistas `leaderboard` (mejor marca por jugador/juego, `rank`) y `game_stats` (`best`, `plays`), ambas `security_invoker`.
-- `lib/games/queries.ts` (`getGame`, `getGamesWithStats`, `getLeaderboard`, `getPlayerBest`…).
+- `lib/catalog/queries.ts` (`getGame`, `getGamesWithStats`, `getLeaderboard`, `getPlayerBest`…).
 - Server Action `app/juegos/[id]/jugar/actions.ts` → `saveScore({gameId, score})`: valida entero 0–99.999.999, usuario, juego `playable`; inserta; `revalidatePath` de `/salon`, `/biblioteca`, `/juegos/<id>`.
 - Modal "FIN DEL JUEGO" en `GamePlayer`: demo (`!playable`), invitado (→ `/auth`), con sesión (GUARDAR; estados idle/saving/saved/error).
 - `/juegos/[id]`, `/salon?juego=<id>`, `/biblioteca` leen de la BD.

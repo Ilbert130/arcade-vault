@@ -2,9 +2,9 @@
 
 ## Referencia de layout (al 2026-10-20, rama spec-13-gamepad-mk2, sin commitear)
 
-- Mando: `components/games/TouchPad.tsx` (Pointer Events, repetición 170/50 ms, prop `skin` → `data-skin`), tipos en `lib/games/touch.ts`, `touch` obligatorio en `components/games/registry.tsx`, `inputRef` + `releaseAll()` en `components/GamePlayer.tsx`.
+- Mando: `components/player/TouchPad.tsx` (Pointer Events, repetición 170/50 ms, prop `skin` → `data-skin`), tipos en `lib/games/platform/touch.ts`, `touch` obligatorio en `components/games/registry.tsx`, `inputRef` + `releaseAll()` en `components/player/GamePlayer.tsx`.
 - MK-II (spec 13): silueta fija 4 teclas + hub/gema + B,A; slots sin acción = `InertButton` (`data-inert`, `aria-disabled`, sin handlers); serigrafía `.touch-silk` solo con texto en A/B con acción; flechas SVG.
-- CSS en `app/globals.css`, bloque `/* ===== mando táctil: Gamepad MK-II (specs 12 y 13) ===== */` (~l.3141):
+- CSS en `app/styles/touchpad.css` (y layout móvil en `app/styles/player-mobile.css`), bloque `/* ===== mando táctil: Gamepad MK-II (specs 12 y 13) ===== */`:
   - Paletas `--pad-*` en `.touch-pad` (clasico) y `[data-skin="neon"|"retro"]`; `--pad-glow` multiplica glows (0 en retro); `--ab = --key × 1.35`.
   - `@media (pointer: coarse)`: carcasa única (tableta), `.crt-controls` oculto.
   - Móvil `(coarse) and (max-width:720px), (coarse) and (max-height:560px)`: 100dvh, footer/`.crt-bottom` ocultos, HUD 1 fila.
@@ -41,7 +41,7 @@ Pendiente: m-xs (320×568), m-sm, m-lg, l-sm (667×375), d-narr y páginas no-ju
 
 - RANARIA (2026-10-22, sin verificar en navegador: no había Chrome DevTools MCP en esa invocación): mundo 800×600 se escala a CRT 4:3; en 390 px escala ≈0,46 → HUD interno `lib/games/ranaria/draw.ts:376-385` (14/16 px lógicos) sale a ~6,5–7,4 px (≈5 px en 320). Celda 40 px lógicos → ~18 px. HUD del `GamePlayer` ya muestra puntos/vidas/nivel, así que es redundante. Arreglo real = spec (tablero vertical 8:7 en móvil o HUD escalado), no CSS. D-pad sin `repeat` (`registry.tsx` ranaria): SPEC 12 sugiere `repeat` en movimiento por casillas, pero el motor ignora `e.repeat` a propósito (un toque = un salto); decisión de jugabilidad, no tocada. `.ranaria-canvas` CSS idéntico a los demás (absolute, 100%).
 
-- `components/Nav.tsx:123` `.av-mobile-panel` cerrado queda fuera de pantalla con `translateX` pero sin `inert`/`aria-hidden`/`visibility:hidden`: sigue en el árbol a11y y es tabulable. No causa scroll. No propuesto como spec.
+- `components/layout/Nav.tsx:123` `.av-mobile-panel` cerrado queda fuera de pantalla con `translateX` pero sin `inert`/`aria-hidden`/`visibility:hidden`: sigue en el árbol a11y y es tabulable. No causa scroll. No propuesto como spec.
 - Anillo discontinuo de A/B pulsado (`.touch-btn-ring`, inset −11 %) cruza la serigrafía `.touch-silk` debajo (visible en 390 y 844). Cosmético.
 - Vertical 390×844: carcasa única mucho más alta que la cruceta (395 vs 158 px): hueco vacío arriba/abajo. Cosmético.
 - Retro: A/B inertes en `--pad-key-ink` claro sobre carcasa beige a opacidad .32: muy tenues (aceptable como "apagado").

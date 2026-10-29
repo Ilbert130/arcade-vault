@@ -1,51 +1,25 @@
 "use client";
-import type { ComponentType, RefObject } from "react";
-import type { SkinId } from "@/lib/games/skins";
-import type { GameInput, TouchLayout } from "@/lib/games/touch";
-import { touchLayout } from "@/lib/games/touch";
-import type { AsteroidsAction } from "@/lib/games/asteroids/types";
-import type { TetrisAction } from "@/lib/games/tetris/types";
+import type { GameEntry } from "@/lib/games/platform/contract";
+import { touchLayout } from "@/lib/games/platform/touch";
+import type { RocasAction } from "@/lib/games/rocas/types";
+import type { CaidaAction } from "@/lib/games/caida/types";
 import type { BloqueBusterAction } from "@/lib/games/bloque-buster/types";
 import type { SerpentinaAction } from "@/lib/games/serpentina/types";
 import type { RanariaAction } from "@/lib/games/ranaria/types";
-import AsteroidsCanvas from "@/components/games/AsteroidsCanvas";
-import TetrisCanvas from "@/components/games/TetrisCanvas";
+import RocasCanvas from "@/components/games/RocasCanvas";
+import CaidaCanvas from "@/components/games/CaidaCanvas";
 import BloqueBusterCanvas from "@/components/games/BloqueBusterCanvas";
 import SerpentinaCanvas from "@/components/games/SerpentinaCanvas";
 import RanariaCanvas from "@/components/games/RanariaCanvas";
-export type GameStatus = "ready" | "playing" | "paused" | "over";
-export type HudField = "score" | "lives" | "level" | "lines";
-// Superconjunto de los HUD de cada motor; GamePlayer solo lee los campos de `entry.hud`.
-export type GenericHud = {
-  score: number;
-  lives?: number;
-  level?: number;
-  lines?: number;
-};
-export type GameRenderProps = {
-  status: GameStatus;
-  skin: SkinId;
-  onHud: (hud: GenericHud) => void;
-  onGameOver: (finalScore: number) => void;
-  inputRef: RefObject<GameInput | null>;
-};
-export type GameEntry = {
-  Canvas: ComponentType<GameRenderProps>;
-  hud: HudField[];
-  controls: string;
-  startTitle: string;
-  startHint: string;
-  touch: TouchLayout;
-};
 // Juegos con motor real. Los que no estén aquí usan la simulación de GamePlayer.
 export const GAME_REGISTRY: Record<string, GameEntry> = {
   rocas: {
-    Canvas: AsteroidsCanvas,
+    Canvas: RocasCanvas,
     hud: ["score", "lives", "level"],
     controls: "← → ROTAR · ↑ PROPULSAR · ESPACIO DISPARAR · P PAUSA",
     startTitle: "ROCAS",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
-    touch: touchLayout<AsteroidsAction>([
+    touch: touchLayout<RocasAction>([
       { slot: "left", action: "rotateLeft", label: "GIRAR" },
       { slot: "right", action: "rotateRight", label: "GIRAR" },
       { slot: "up", action: "thrust", label: "PROPULSAR" },
@@ -53,13 +27,13 @@ export const GAME_REGISTRY: Record<string, GameEntry> = {
     ]),
   },
   caida: {
-    Canvas: TetrisCanvas,
+    Canvas: CaidaCanvas,
     hud: ["score", "lines", "level"],
     controls:
       "← → MOVER · ↑ ROTAR · ↓ CAÍDA SUAVE · ESPACIO CAÍDA DURA · P PAUSA",
     startTitle: "CAÍDA",
     startHint: "PULSA ESPACIO PARA EMPEZAR",
-    touch: touchLayout<TetrisAction>([
+    touch: touchLayout<CaidaAction>([
       { slot: "left", action: "moveLeft", label: "MOVER", repeat: true },
       { slot: "right", action: "moveRight", label: "MOVER", repeat: true },
       { slot: "down", action: "softDrop", label: "BAJAR", repeat: true },

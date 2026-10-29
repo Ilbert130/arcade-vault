@@ -1,4 +1,4 @@
-import type { SkinId } from "../skins";
+import type { SkinId } from "@/lib/games/platform/skins";
 export type BloqueBusterHud = {
   score: number;
   lives: number;
