@@ -28,7 +28,7 @@ Responde en el idioma del usuario; el texto de UI del proyecto va en español.
 
 ### 1. Identificar el juego
 
-- **¿Hay referencia?** Mira `references/started-games/` (`ls`). Si existe la carpeta (p. ej. `03-tetris`, `04-arkanoid`), lee `game.js`, `index.html`, assets, su `CLAUDE.md`/`README.md`. Si no existe o el usuario pide un juego nuevo, diséñalo desde cero con el mismo contrato (no inventes una referencia).
+- **¿Hay referencia?** Mira `references/started-games/` (`ls`). Si existe la carpeta (p. ej. `03-tetris`, `04-arkanoid`), lee `game.js`, `index.html`, assets y su `README.md`. Si no existe o el usuario pide un juego nuevo, diséñalo desde cero con el mismo contrato (no inventes una referencia).
 - **¿Ya está en el catálogo?** Revisa `supabase/migrations/*games_scores.sql`: ids sembrados con `playable=false`: `bloque-buster` (Arkanoid), `caida` (Tetris), `serpentina`, `gloton`, `invasores`, `ranaria`, `duelo-pixel`. Si el id existe, solo se hace `update ... set playable = true`; si es nuevo, `insert` con `sort_order` único, `cat` ∈ ARCADE/PUZZLE/SHOOTER/VERSUS, `color` ∈ cyan/magenta/yellow/green y una clase `cover-*`.
 - Si hay ambigüedad real (qué juego, controles, alcance de niveles/sonido), pregunta antes de seguir.
 
