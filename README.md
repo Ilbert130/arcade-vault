@@ -23,14 +23,14 @@ npm run dev                  # http://localhost:3000
 
 ## Scripts
 
-| Comando                       | Qué hace                                                        |
-| ----------------------------- | --------------------------------------------------------------- |
-| `npm run dev`                 | Servidor de desarrollo                                          |
-| `npm run build` / `npm start` | Build de producción y servidor                                  |
-| `npm run lint`                | ESLint                                                          |
-| `npm run typecheck`           | `tsc --noEmit`                                                  |
-| `npm run check`               | Lint + typecheck (lo mismo que comprueba la CI, salvo el build) |
-| `npm run format`              | Prettier sobre todo el repo                                     |
+| Comando                       | Qué hace                                                           |
+| ----------------------------- | ------------------------------------------------------------------ |
+| `npm run dev`                 | Servidor de desarrollo                                             |
+| `npm run build` / `npm start` | Build de producción y servidor                                     |
+| `npm run lint`                | ESLint                                                             |
+| `npm run typecheck`           | `next typegen` + `tsc --noEmit` (genera `PageProps`/`LayoutProps`) |
+| `npm run check`               | Lint + typecheck (lo mismo que comprueba la CI, salvo el build)    |
+| `npm run format`              | Prettier sobre todo el repo                                        |
 
 La CI (`.github/workflows/ci.yml`) ejecuta lint, typecheck y build en cada PR y en cada push a `main`.
 
