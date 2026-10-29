@@ -1,4 +1,4 @@
-# 13 — ANZUELO: Pesca de riesgo en la sima
+# 16 — ANZUELO: Pesca de riesgo en la sima
 
 **Estado:** Borrador
 **Depende de:** SPEC 05-asteroides-rocas, SPEC 06-leaderboard-tabla-juegos, SPEC 10-snake-serpentina
@@ -107,7 +107,7 @@ components/games/registry.tsx                               entrada nueva
 app/globals.css                                             .cover-anzuelo + .anzuelo-canvas
 supabase/migrations/<timestamp>_anzuelo_playable.sql        nuevo (insert)
 references/implemented-games/implemented-games.md           fila nueva
-specs/13-anzuelo.md                                         este spec
+specs/16-anzuelo.md                                         este spec
 CLAUDE.md                                                   juegos jugables / specs implementados
 ```
 

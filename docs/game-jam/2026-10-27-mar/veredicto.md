@@ -32,7 +32,7 @@ Sin vetos: ids libres, HUD ⊂ `score/lives/level`, sin red.
 
 Mejor equilibrio entre viabilidad, controles y rejugabilidad: bucle de riesgo/recompensa claro ("una inmersión más"), puntuación que premia la habilidad (multiplicador por peces, profundidad, redada) y un motor pequeño sin IA ni assets. El tema está en la mecánica (profundidad, pesca, medusas).
 
-**Spec:** `specs/13-anzuelo.md` · **Correcciones al copiar:** aclarado que ↓ acelera el descenso (decía "sube"). `sort_order = 21` no choca con B (32) ni C (9); comprobar contra la BD al migrar.
+**Spec:** `specs/16-anzuelo.md` · **Correcciones al copiar:** aclarado que ↓ acelera el descenso (decía "sube"). `sort_order = 21` no choca con B (32) ni C (9); comprobar contra la BD al migrar.
 
 ## Por qué no las otras
 

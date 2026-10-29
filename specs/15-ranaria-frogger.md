@@ -1,4 +1,4 @@
-# SPEC — Frogger: integración core del juego
+# 15 — RANARIA (Frogger): integración core del juego
 
 > **Estado:** Aprobado
 > **Depende de:** 06-games-table-leaderboard-supabase
