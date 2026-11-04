@@ -106,7 +106,21 @@ export default function Auth() {
               onChange={(e) => setPass(e.target.value)}
               placeholder="••••••••"
               autoComplete={tab === "in" ? "current-password" : "new-password"}
+              aria-describedby={tab === "up" ? "auth-pass-hint" : undefined}
             />
+            {tab === "up" && (
+              <div
+                id="auth-pass-hint"
+                style={{
+                  marginTop: 6,
+                  fontFamily: "var(--mono)",
+                  fontSize: 12,
+                  color: "var(--ink-dim)",
+                }}
+              >
+                Mínimo 8 caracteres
+              </div>
+            )}
           </div>
           {status === "error" && (
             <div className="auth-error" role="alert">

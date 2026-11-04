@@ -90,19 +90,19 @@ specs/19-endurecer-contacto-auth-rls.md                este spec
 
 ## Criterios de aceptación
 
-- [ ] `sendContactMessage` devuelve `{ ok: false }` si el nombre supera 100, el correo 254 o el mensaje 2000 caracteres.
-- [ ] Un nombre con `\r` o `\n` produce un `subject` de una sola línea.
-- [ ] Una llamada a `sendContactMessage` con `website` no vacío devuelve `{ ok: true }` y no invoca a Resend.
-- [ ] Un envío normal desde `/about` (sin `website`) sigue llegando a la bandeja de contacto.
-- [ ] El campo `website` no es visible, no recibe foco con Tab y no lo anuncia un lector de pantalla.
-- [ ] Los inputs de nombre, correo y mensaje de `/about` tienen `maxLength` igual a los límites del servidor.
-- [ ] `signUp` rechaza contraseñas de menos de 8 caracteres con el mensaje "La contraseña debe tener al menos 8 caracteres".
+- [x] `sendContactMessage` devuelve `{ ok: false }` si el nombre supera 100, el correo 254 o el mensaje 2000 caracteres.
+- [x] Un nombre con `\r` o `\n` produce un `subject` de una sola línea.
+- [x] Una llamada a `sendContactMessage` con `website` no vacío devuelve `{ ok: true }` y no invoca a Resend.
+- [x] Un envío normal desde `/about` (sin `website`) sigue llegando a la bandeja de contacto.
+- [x] El campo `website` no es visible, no recibe foco con Tab y no lo anuncia un lector de pantalla.
+- [x] Los inputs de nombre, correo y mensaje de `/about` tienen `maxLength` igual a los límites del servidor.
+- [x] `signUp` rechaza contraseñas de menos de 8 caracteres con el mensaje "La contraseña debe tener al menos 8 caracteres".
 - [ ] `signIn` con una cuenta existente de 6 o 7 caracteres sigue funcionando.
-- [ ] La pestaña de registro de `/auth` muestra "Mínimo 8 caracteres" y la de inicio de sesión no.
-- [ ] `has_function_privilege` de `anon` y `authenticated` sobre `public.rls_auto_enable()` es `false`.
-- [ ] Crear una tabla nueva en `public` sigue activando RLS automáticamente (el event trigger no se rompe).
+- [x] La pestaña de registro de `/auth` muestra "Mínimo 8 caracteres" y la de inicio de sesión no.
+- [x] `has_function_privilege` de `anon` y `authenticated` sobre `public.rls_auto_enable()` es `false`.
+- [x] Crear una tabla nueva en `public` sigue activando RLS automáticamente (el event trigger no se rompe).
 - [ ] `get_advisors` (security) no devuelve los lints `anon_security_definer_function_executable`, `authenticated_security_definer_function_executable` ni `auth_leaked_password_protection`.
-- [ ] `npm run check` y `npm run build` sin errores.
+- [x] `npm run check` y `npm run build` sin errores.
 
 ## Decisiones tomadas y descartadas
 

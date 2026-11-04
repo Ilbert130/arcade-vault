@@ -1,6 +1,6 @@
 # Specs
 
-Specs de Spec Driven Design (`/spec`, `/spec-impl`, `/spec-impl-game`). Cada spec se implementa en su rama `spec-NN-slug` (`.spec-config.yml`). El siguiente número libre es **19**.
+Specs de Spec Driven Design (`/spec`, `/spec-impl`, `/spec-impl-game`). Cada spec se implementa en su rama `spec-NN-slug` (`.spec-config.yml`). El siguiente número libre es **20**.
 
 | NN  | Spec                                                                                      | Tema                                                              | Estado       |
 | --- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------ |
@@ -23,6 +23,7 @@ Specs de Spec Driven Design (`/spec`, `/spec-impl`, `/spec-impl-game`). Cada spe
 | 16  | [16-anzuelo](16-anzuelo.md)                                                               | ANZUELO, ganador de la jam "fondo del mar"                        | Borrador     |
 | 17  | [17-confirmacion-correo-recuperar-password](17-confirmacion-correo-recuperar-password.md) | Confirmación de correo y recuperar contraseña (rama sin fusionar) | Pausado      |
 | 18  | [18-oauth-google-github](18-oauth-google-github.md)                                       | Inicio de sesión con Google y GitHub                              | Borrador     |
+| 19  | [19-endurecer-contacto-auth-rls](19-endurecer-contacto-auth-rls.md)                       | Endurecer contacto, contraseñas y función RLS                     | Aprobado     |
 
 Notas:
 

@@ -1,41 +1,34 @@
 "use client";
-
 import { useState } from "react";
 import { useReveal } from "@/components/shared/useReveal";
 import { sendContactMessage } from "@/app/about/actions";
-
-type FormState = { name: string; email: string; msg: string };
+type FormState = { name: string; email: string; msg: string; website: string };
 type Status = "idle" | "sending" | "sent" | "error";
-
-const EMPTY_FORM: FormState = { name: "", email: "", msg: "" };
-
+const EMPTY_FORM: FormState = { name: "", email: "", msg: "", website: "" };
+// Mismos valores que LIMITS en app/about/actions.ts (el servidor es la fuente de verdad).
+const MAX = { name: 100, email: 254, message: 2000 } as const;
 export default function About() {
   useReveal();
-
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [sent, setSent] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
-
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!form.name.trim() || !form.email.trim() || !form.msg.trim()) {
       setShake(true);
       setTimeout(() => setShake(false), 400);
       return;
     }
-
     setStatus("sending");
     setErrorMsg("");
-
     const result = await sendContactMessage({
       name: form.name.trim(),
       email: form.email.trim(),
       message: form.msg.trim(),
+      website: form.website,
     });
-
     if (result.ok) {
       setSent(form.name.trim());
       setStatus("sent");
@@ -44,14 +37,12 @@ export default function About() {
       setErrorMsg(result.error);
     }
   };
-
   const resetForm = () => {
     setSent(null);
     setStatus("idle");
     setErrorMsg("");
     setForm(EMPTY_FORM);
   };
-
   return (
     <div className="about fade-in">
       {/* ABOUT */}
@@ -64,7 +55,6 @@ export default function About() {
           generación, haciéndolos accesibles para todos, en cualquier lugar y
           sin costo.
         </p>
-
         <div className="highlight-row">
           {[
             { i: "HEART", t: "HECHO CON ❤️ PARA JUGADORES", c: "magenta" },
@@ -86,7 +76,6 @@ export default function About() {
           ))}
         </div>
       </section>
-
       {/* divider banner */}
       <div className="about-divider reveal" aria-hidden="true">
         <div className="div-bar"></div>
@@ -97,7 +86,6 @@ export default function About() {
         </div>
         <div className="div-bar"></div>
       </div>
-
       {/* CONTACT */}
       <section className="about-contact reveal">
         <div className="contact-grid">
@@ -120,7 +108,6 @@ export default function About() {
               </div>
             </div>
           </div>
-
           <form
             className={"contact-form" + (shake ? " shake" : "")}
             onSubmit={onSubmit}
@@ -133,6 +120,7 @@ export default function About() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="px_kai"
+                    maxLength={MAX.name}
                   />
                 </div>
                 <div className="field">
@@ -144,6 +132,7 @@ export default function About() {
                       setForm({ ...form, email: e.target.value })
                     }
                     placeholder="jugador@vault.gg"
+                    maxLength={MAX.email}
                   />
                 </div>
                 <div className="field">
@@ -153,7 +142,20 @@ export default function About() {
                     value={form.msg}
                     onChange={(e) => setForm({ ...form, msg: e.target.value })}
                     placeholder="Cuéntanos qué tienes en mente…"
+                    maxLength={MAX.message}
                   ></textarea>
+                </div>
+                <div className="hp-field" aria-hidden="true">
+                  <input
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={form.website}
+                    onChange={(e) =>
+                      setForm({ ...form, website: e.target.value })
+                    }
+                  />
                 </div>
                 <button
                   className="btn xl press"
@@ -205,7 +207,6 @@ export default function About() {
     </div>
   );
 }
-
 function HighlightIcon({ kind }: { kind: string }) {
   const C = "currentColor";
   if (kind === "HEART")
