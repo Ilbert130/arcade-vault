@@ -3,12 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 export type AuthResult = { ok: true } | { ok: false; error: string };
 const USERNAME_RE = /^[A-Z0-9_]{3,10}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD = 6;
+const MIN_PASSWORD = 8;
 const ERR = {
   credentials: "Correo o contraseña incorrectos",
   usernameTaken: "Ese usuario ya existe",
   emailTaken: "Ese correo ya está registrado",
-  weakPassword: "La contraseña debe tener al menos 6 caracteres",
+  weakPassword: "La contraseña debe tener al menos 8 caracteres",
   invalidUsername: "Usuario inválido: 3–10 caracteres, letras, números o _",
   invalidEmail: "Ingresa un correo electrónico válido.",
   generic: "No se pudo conectar. Inténtalo de nuevo.",

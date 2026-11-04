@@ -243,6 +243,15 @@
 .contact-form input::placeholder {
   color: var(--ink-faint);
 }
+/* Honeypot anti-spam: fuera de pantalla (no display:none, algunos bots lo ignoran) */
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 .btn.press:active {
   transform: translateY(3px) scale(0.99);
   box-shadow: 0 0 6px rgba(0, 245, 255, 0.2) inset;
