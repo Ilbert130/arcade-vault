@@ -1,0 +1,77 @@
+.counter-page {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 120px 16px 64px;
+  text-align: center;
+}
+.counter-eyebrow {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--cyan);
+}
+.counter-title {
+  font-family: var(--pixel);
+  font-size: clamp(18px, 4vw, 30px);
+  line-height: 1.4;
+  color: var(--ink);
+}
+.counter-screen {
+  display: grid;
+  place-items: center;
+  width: min(100%, 360px);
+  aspect-ratio: 1;
+  border: 2px solid var(--cyan);
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 40%, #11182e, var(--bg) 75%);
+  box-shadow:
+    0 0 0 4px var(--bg),
+    0 0 24px var(--line);
+  overflow: hidden;
+}
+.counter-empty {
+  max-width: 22ch;
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--ink-dim);
+}
+.counter-sprite {
+  width: 88%;
+  height: auto;
+  animation: counter-pop 0.25s ease-out;
+}
+.counter-number {
+  font-family: var(--pixel);
+  font-size: 20px;
+  color: var(--yellow);
+}
+.counter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+.counter-actions .btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@keyframes counter-pop {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .counter-sprite {
+    animation: none;
+  }
+}
